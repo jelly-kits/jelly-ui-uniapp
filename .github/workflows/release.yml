@@ -1,0 +1,65 @@
+name: Release
+
+# 推 v* 标签时把 uni-app 版组件库发布到 npm：
+# https://www.npmjs.com/package/@jelly-kits/jelly-ui-uniapp
+# 发版流程：npm version minor && git push --follow-tags
+#
+# 认证走「可信发布（OIDC）」——仓库里不存任何 npm token，认证方式与主库 jelly-ui 一致。
+# npm 包页面的 Trusted Publisher 已绑定本仓库的这个文件名，两边改名要同步。
+# 注意：该页面的 Allowed actions 默认只允许 npm stage publish，
+# 必须勾上 "npm publish"，否则这里会认证失败。
+#
+# 首个版本发不了这里：npm 要求包已存在才能配置可信发布，是个先有鸡还是先有蛋的问题。
+# 0.1.0 必须先在本地 `npm login` + `npm publish` 手工发出，之后再把信任关系配好。
+
+on:
+  push:
+    tags: ['v*']
+
+# id-token 是 OIDC 的全部前提，删掉就拿不到临时令牌。
+# contents: read 只够 checkout，发布权限由 npm 侧的信任关系授予，不需要写权限。
+permissions:
+  contents: read
+  id-token: write
+
+# 发布不做并发取消：打断一个跑到一半的发布比排队更危险。
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # 可信发布要求 Node >= 22.14.0、npm CLI >= 11.5.1。
+          # 刻意不写 registry-url：它会生成一个引用 ${NODE_AUTH_TOKEN} 的 .npmrc，
+          # 而 OIDC 流程根本没有 token；发布目标由 package.json 的
+          # publishConfig 指定，不需要额外配置。
+          node-version: '22'
+          cache: npm
+
+      # Node 22 自带的是 npm 10.x，够不到 11.5.1 的下限，必须显式升上来。
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      # 防止标签与版本号脱节：v0.2.0 的标签必须对应 package.json 里的 0.2.0。
+      # npm 只会拦「版本已存在」，拦不住「以错误的标签发布了一个版本」。
+      - name: 校验标签与版本号一致
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::标签 $GITHUB_REF_NAME 与 package.json 的版本 $pkg 不一致。应先 npm version 再推标签。"
+            exit 1
+          fi
+
+      # prepack 会自动跑 build:pkg，把 src/ 下的组件、core、主题整理到包根，
+      # 这里不需要再单独构建。可信发布会自动生成 provenance 签名，不需要 --provenance。
+      # 预发布版本（如 0.2.0-beta.1）要另行加 --tag next，否则会盖掉正式版的 latest。
+      - name: 发布到 npm
+        run: npm publish

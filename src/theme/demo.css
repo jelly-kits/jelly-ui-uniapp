@@ -1,0 +1,415 @@
+/*
+ * 演示站共用样式：页面外壳（.doc*）+ 演示内容（.demo-* / .popup-demo / .segmented-row）。
+ *
+ * 为什么放全局而不是页面内：93 个页面（1 个目录页 + 92 个组件详情页）共用同一套外壳与演示排版，
+ * 写在页面内会被打包 93 遍。这里全部是带前缀的类名，且页面本身没有样式隔离
+ * （小程序端的样式隔离只作用于自定义组件内部，页面与 app.wxss 之间是通的），
+ * 所以不会跟组件的 je- 类名撞车。
+ *
+ * 页面自己独有的样式才写在各自的 <style scoped> 里（如目录页的 .home__*）。
+ */
+
+/* ---------- 页面外壳 ---------- */
+
+/*
+ * 整页锁在一屏内，只有内容区自己滚（外层不滚）。
+ * 高度用运行时变量算：小程序端 webview 就是一屏（--window-top / --window-bottom 为 0px），
+ * H5 端 uni-app 把模拟导航栏 / 标签栏也放进 webview，100vh 会多算它们的部分，扣掉即可。
+ * 不能用 height: 100%：uni-page-body 没有确定高度，会塌成 0，整块内容就看不见了。
+ */
+.doc {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: calc(100vh - var(--window-top, 0px) - var(--window-bottom, 0px));
+  overflow: hidden;
+  /* 组件是半透明表面，需要宿主给出不透明背景；用主题的页面底色，明暗两套都能跟着走 */
+  background: linear-gradient(160deg, var(--je-bg-page-from), var(--je-bg-page-to));
+  color: var(--je-text);
+}
+
+.doc__bar {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  /* 页面已改成自定义导航栏，从屏幕最顶上开始渲染，顶栏要自己让出状态栏高度
+     （--status-bar-height 是 uni 的全局变量：小程序端为状态栏高度，H5 端为 0） */
+  height: calc(56px + var(--status-bar-height, 0px));
+  padding: var(--status-bar-height, 0px) 16px 0;
+  background: var(--je-popup);
+  border-bottom: var(--je-border);
+}
+
+.doc__bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+}
+
+/*
+ * Jelly UI 品牌 logo（与桌面演示站的 public/logo.svg 同一份图形）。
+ * 它是多色描边图形，没法用 je-icon 的单色 path 表达，所以内联成 data-URI 作背景图 ——
+ * H5 与小程序端的 CSS background-image 都能渲染 SVG。宽高由各处的容器类给出。
+ */
+.je-logo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect x='28' y='28' width='144' height='144' rx='46' ry='46' fill='none' stroke='%233AA0F5' stroke-width='16'/%3E%3Cpath d='M128 64 L128 112 Q128 140 100 140 Q72 140 72 112' fill='none' stroke='%23FF6B6B' stroke-width='22' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M72 64 L72 82' fill='none' stroke='%233AA0F5' stroke-width='22' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* 目录页品牌：logo + 名称 */
+.doc__logo {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.doc__brand {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--je-text);
+}
+
+/* 目录页顶栏右侧的主题入口：靠 margin-left:auto 贴到最右 */
+.doc__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* #ifdef MP-WEIXIN */
+/*
+ * 微信的胶囊按钮（固定 87×32、右边距 7–10px）常驻右上角且无法隐藏。
+ * 顶栏是自定义导航栏（navigationStyle: custom），右侧入口要自己让出这段宽度，
+ * 否则会被胶囊盖住，点击也会被它吃掉。
+ * 88px 是在 .doc__bar 的 16px 右侧内边距之外补的余量，让图标右缘落在胶囊左侧之外。
+ */
+.doc__actions {
+  margin-right: 88px;
+}
+/* #endif */
+
+.doc__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: var(--je-text);
+  border-radius: 10px;
+  transition: background var(--je-duration) ease;
+}
+
+.doc__action:active {
+  background: var(--je-surface-hover);
+}
+
+/* 详情页返回 */
+.doc__back {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: -8px;
+  color: var(--je-text);
+}
+
+/* #ifdef H5 */
+/*
+ * 文档站右侧「手机预览」iframe：这个 iframe 以 ?preview=1 打开演示页，
+ * main.ts 会据此给 <html> 加上 .je-preview。此时只留演示内容，去掉顶栏、
+ * 并补回顶栏原本承担的上内边距，让演示从 iframe 顶部开始。
+ */
+.je-preview .doc__bar {
+  display: none;
+}
+
+.je-preview .doc__body {
+  padding-top: 0;
+}
+/* #endif */
+
+/* 当前组件名 / 当前栏目名：占满剩余宽度、超长省略 */
+.doc__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--je-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 内容区：每页只渲染自己那一块，滚动交给它自己 */
+.doc__body {
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 12px 0 40px;
+}
+
+/* ---------- 演示内容 ---------- */
+
+/* 分段控制器独占一行时的内边距，与 JeCell 的左右内边距对齐 */
+.segmented-row {
+  padding: 14px 16px;
+}
+
+/* 表单 / 输入框演示区的内边距，与 JeCell 的左右内边距对齐 */
+.demo-block {
+  padding: 16px;
+}
+
+/* 演示内容里纵向堆叠多个组件时，给它们之间留出间距 */
+.demo-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 多个组件并排展示时用的一行布局 */
+.demo-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 浮层批次：并排的一行与上一行拉开距离 */
+.demo-row--gap-top {
+  margin-top: 12px;
+}
+
+/* 弹出层里的示意内容 */
+.popup-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px;
+}
+
+.popup-demo__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--je-text);
+}
+
+.popup-demo__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--je-text-muted);
+}
+
+/* JeAffix 演示 */
+.demo-affix {
+  padding: 16px;
+}
+
+.demo-affix__bar {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--je-text-on-color);
+  background: linear-gradient(135deg, var(--je-primary), var(--je-primary-end));
+  border-radius: var(--je-radius-sm);
+}
+
+.demo-affix__body {
+  height: 160px;
+  padding-top: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--je-text-muted);
+}
+
+/* JeAnchor 演示段落 */
+.demo-anchor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  min-height: 120px;
+  padding: 16px;
+  border-top: 1px solid var(--je-border-color);
+}
+
+.demo-anchor__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--je-text);
+}
+
+.demo-anchor__desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--je-text-muted);
+}
+
+/* JeSidebar 演示：左列高度来自容器 */
+.demo-sidebar {
+  display: flex;
+  height: 220px;
+  overflow: hidden;
+}
+
+.demo-sidebar__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.demo-sidebar__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--je-text);
+}
+
+.demo-sidebar__desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--je-text-muted);
+}
+
+/* JeCarousel 演示：图片与纯色页都撑满一屏 */
+.demo-carousel__slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--je-text-on-color);
+}
+
+.demo-carousel__slide--plain {
+  background: linear-gradient(135deg, var(--je-primary), var(--je-primary-end));
+}
+
+/* JePopover 面板里的说明文字 */
+.demo-pop__text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--je-text-muted);
+}
+
+/* JeSplitter 演示：根节点靠百分比撑满，父容器必须给出确定高度 */
+.demo-splitter {
+  height: 180px;
+  padding: 16px;
+}
+
+.demo-splitter__pane {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--je-text-muted);
+}
+
+/* JeOrgChart 演示：根节点 min-height 320px，这里给宽高都确定的容器 */
+.demo-org {
+  height: 360px;
+  padding: 16px;
+}
+
+/* JeSignature / JePoster 演示区宽度撑满，与卡片左右内边距对齐 */
+.demo-signature,
+.demo-poster {
+  padding: 16px;
+}
+
+/* JeWatermark 演示：水印平铺在包裹内容上，内容区给出足够高度与水印间距才能看清 */
+.demo-watermark {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 320px;
+  padding: 16px;
+}
+
+.demo-watermark__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--je-text);
+}
+
+.demo-watermark__desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--je-text-muted);
+}
+
+/* JePullRefresh 演示：下拉需要足够的纵向空间才好操作，内容区给到一屏左右的高度 */
+.demo-pull {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  min-height: 280px;
+  padding: 16px;
+}
+
+.demo-pull__row {
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--je-text-muted);
+  background: var(--je-surface);
+  border: var(--je-border);
+  border-radius: var(--je-radius-sm);
+}
+
+/* JeSwipeCell 演示：滑出的操作区是等高色块，动作直接铺满单元格高度 */
+.demo-swipe-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  box-sizing: border-box;
+  min-width: 72px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 500;
+  /* 压在语义色块上，文字固定浅色 */
+  color: var(--je-text-on-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.demo-swipe-action--pin {
+  background: var(--je-primary);
+}
+
+.demo-swipe-action--delete {
+  background: var(--je-danger);
+}
+
+/* JeTable 演示：状态列用语义色，展开行用弱化文案 */
+.demo-table {
+  padding: 4px 0;
+}
+
+.demo-table__ok {
+  color: var(--je-success);
+}
+
+.demo-table__bad {
+  color: var(--je-danger);
+}
+
+.demo-table__expand {
+  font-size: 13px;
+  color: var(--je-text-muted);
+}

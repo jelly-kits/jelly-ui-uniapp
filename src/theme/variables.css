@@ -1,0 +1,160 @@
+/**
+ * Jelly UI 主题变量（明 / 暗两套）。
+ *
+ * 默认跟随系统：:root 是浅色，系统偏好深色时由媒体查询切到深色；
+ * 手动指定时在 <html> 上写 data-theme="light" / "dark"，它的优先级高于媒体查询。
+ *
+ * 覆盖 --je-primary / --je-primary-end 两个变量即可换肤：
+ *
+ *   .my-scope { --je-primary: #10b981; --je-primary-end: #059669; }
+ *
+ * 注意：这里只放「原始」token。像渐变、半透明强调色、彩色光晕这类
+ * 由主色推导出来的值，必须在组件内部现算（linear-gradient / color-mix），
+ * 否则自定义属性里的 var() 会在根节点上就被替换掉，后代覆盖主色将失效。
+ *
+ * 文字分两族，别混用：
+ *   --je-text*       普通正文，随明暗翻转（浅色主题下是深色文字）
+ *   --je-text-on-color 彩色 / 渐变 / 深色遮罩上的文字与图标，两套主题都取浅色
+ *
+ * 【uni-app 版差异】本文件复制自主库 src/theme/variables.css，改动集中在选择器：
+ *   1. 浅色 token 块按平台分选择器：H5 用 `:root`，小程序用 `page`
+ *      （小程序没有 <html>，页面根节点是 <page>）。
+ *   2. 深色块三份：H5 的两份保持 `:root:not([data-theme='light'])` 与
+ *      `:root[data-theme='dark']`；小程序端另有一份挂在 `.je-theme-dark` 类上，
+ *      由页面根节点下发（wxss 不认属性选择器与 `:not()`）。
+ * 之所以不能像主库那样写成 `page, :root` 这种并集：微信 wxss 不认 `:root`，
+ * 会把整条规则判为非法而**整块丢弃**，于是所有 --je-* 都成了未定义，
+ * 页面表现为「完全没样式」（只有靠行内变量的图标还能显示）。
+ * 同步主库改动时，除选择器与条件编译外应保持逐字一致。
+ */
+
+/* #ifdef H5 */
+:root {
+/* #endif */
+/* #ifndef H5 */
+page {
+/* #endif */
+  color-scheme: light;
+
+  /* 品牌色 */
+  --je-primary: #667eea;
+  --je-primary-end: #764ba2;
+
+  /* 语义色（原始值，不随主色推导） */
+  --je-success: #22c55e;
+  --je-warning: #f59e0b;
+  --je-danger: #ef4444;
+  --je-info: #7c8db5;
+
+  /* 文字：普通正文 */
+  --je-text: #1f2430;
+  --je-text-muted: rgba(31, 36, 48, 0.68);
+  --je-text-faint: rgba(31, 36, 48, 0.45);
+  /* 彩色 / 渐变 / 深色遮罩上的文字与图标：不随明暗翻转 */
+  --je-text-on-color: #ffffff;
+
+  /* 中性表面（与主色无关） */
+  --je-surface: rgba(15, 23, 42, 0.06);
+  --je-surface-hover: rgba(15, 23, 42, 0.1);
+  --je-popup: rgba(255, 255, 255, 0.98);
+
+  /* 页面底色：组件是半透明表面，需要宿主给出一个不透明的背景 */
+  --je-bg-page-from: #f7f6ff;
+  --je-bg-page-to: #eef1fb;
+
+  /* 描边 */
+  --je-border: 1px solid rgba(15, 23, 42, 0.14);
+  --je-border-color: rgba(15, 23, 42, 0.14);
+
+  /* 圆角 */
+  --je-radius-sm: 10px;
+  --je-radius: 14px;
+  --je-radius-lg: 16px;
+
+  /* 阴影（中性） */
+  --je-shadow-popup: 0 16px 48px rgba(15, 23, 42, 0.18);
+
+  /* 动效 */
+  --je-duration: 0.3s;
+  /** 回弹缓动，用于纯 CSS 的属性（参考实现里的同款曲线） */
+  --je-ease-overshoot: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  /** 带轻微过冲的出场缓动：没有反向预备动作，适合入场 / 一次性动画 */
+  --je-ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* #ifndef H5 */
+/*
+ * 深色（小程序端）：小程序没有 <html>，wxss 也不认 `:not()` 与属性选择器，
+ * 所以深色挂在页面根节点的 `.je-theme-dark` 类上（由 theme/useTheme.ts 的
+ * themeClassForRoot() 下发，见 main.ts 的全局 mixin）。
+ *
+ * 值必须与下面 H5 的两块深色保持一致 —— CSS 没法把一组声明复用到两处。
+ * 另外 `color-scheme` 小程序端不认，这里不写。
+ */
+.je-theme-dark {
+  --je-text: #ffffff;
+  --je-text-muted: rgba(255, 255, 255, 0.7);
+  --je-text-faint: rgba(255, 255, 255, 0.5);
+
+  --je-surface: rgba(255, 255, 255, 0.08);
+  --je-surface-hover: rgba(255, 255, 255, 0.14);
+  --je-popup: rgba(30, 30, 50, 0.95);
+
+  --je-bg-page-from: #1a1a2e;
+  --je-bg-page-to: #16213e;
+
+  --je-border: 1px solid rgba(255, 255, 255, 0.15);
+  --je-border-color: rgba(255, 255, 255, 0.15);
+
+  --je-shadow-popup: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+/* #endif */
+
+/* #ifdef H5 */
+/*
+ * 深色：系统偏好深色、且没有手动指定浅色。
+ * 这一块与下面 [data-theme='dark'] 的值必须保持一致（CSS 没法把一组声明复用到两处）。
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --je-text: #ffffff;
+    --je-text-muted: rgba(255, 255, 255, 0.7);
+    --je-text-faint: rgba(255, 255, 255, 0.5);
+
+    --je-surface: rgba(255, 255, 255, 0.08);
+    --je-surface-hover: rgba(255, 255, 255, 0.14);
+    --je-popup: rgba(30, 30, 50, 0.95);
+
+    --je-bg-page-from: #1a1a2e;
+    --je-bg-page-to: #16213e;
+
+    --je-border: 1px solid rgba(255, 255, 255, 0.15);
+    --je-border-color: rgba(255, 255, 255, 0.15);
+
+    --je-shadow-popup: 0 16px 48px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* 手动指定深色：优先级高于系统偏好 */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --je-text: #ffffff;
+  --je-text-muted: rgba(255, 255, 255, 0.7);
+  --je-text-faint: rgba(255, 255, 255, 0.5);
+
+  --je-surface: rgba(255, 255, 255, 0.08);
+  --je-surface-hover: rgba(255, 255, 255, 0.14);
+  --je-popup: rgba(30, 30, 50, 0.95);
+
+  --je-bg-page-from: #1a1a2e;
+  --je-bg-page-to: #16213e;
+
+  --je-border: 1px solid rgba(255, 255, 255, 0.15);
+  --je-border-color: rgba(255, 255, 255, 0.15);
+
+  --je-shadow-popup: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+/* #endif */

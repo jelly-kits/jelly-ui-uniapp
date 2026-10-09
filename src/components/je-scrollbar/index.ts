@@ -1,0 +1,1 @@
+export { default as JeScrollbar } from './je-scrollbar.vue'

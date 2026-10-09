@@ -1,0 +1,67 @@
+name: Deploy docs
+
+# H5 文档站发布到 GitHub Pages：
+# https://jelly-kits.github.io/jelly-ui-uniapp/
+#
+# 站点内容就是 uni 工程的 H5 产物 —— 组件说明站（#/pages/doc/index）与组件总览
+# （#/pages/index/index）本来就在同一份 H5 构建里，不需要另建一套文档工程。
+#
+# 首次使用需要手动做一次：仓库 Settings → Pages → Source 选 “GitHub Actions”。
+# 之后推 main 自动发布，也可以在 Actions 页手动触发（workflow_dispatch）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages 部署必需：id-token 给 deploy-pages 做 OIDC 校验
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个 Pages 部署。cancel-in-progress 刻意保持 false ——
+# 打断一个进行中的部署可能让线上停在半成品，排队等它跑完更安全。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 提前跑（官方模板也是这个顺序）：Pages 没启用时它会立刻报
+      # “Get Pages site failed”，不用等 npm ci + build 跑完才失败。
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # 项目站发布在 https://<org>.github.io/<repo>/ 子路径下，base 必须是
+      # “/jelly-ui-uniapp/”。写死为 / 会让产物里的 /assets/* 指向站点根目录而 404。
+      # UNI_H5_BASE 由 @dcloudio/uni-h5-vite 读取，优先级高于 manifest.json 的
+      # h5.router.base —— 所以本地 npm run dev:h5 仍按默认的 / 跑，不受影响。
+      # 仓库改名时这里要同步改。
+      - run: npm run build:h5
+        env:
+          UNI_H5_BASE: /jelly-ui-uniapp/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/build/h5
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

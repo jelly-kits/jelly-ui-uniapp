@@ -1,0 +1,10 @@
+node_modules/
+dist/
+unpackage/
+*.local
+.DS_Store
+
+# npm 发布产物（由 scripts/build-package.mjs 生成，仅在打包/发布时存在）
+/components/
+/core/
+/theme/

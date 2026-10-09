@@ -1,0 +1,39 @@
+{
+  "name": "jelly-ui-uniapp",
+  "appid": "",
+  "description": "Jelly UI 的 uni-app 演示工程",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "vueVersion": "3",
+  "app-plus": {
+    "usingComponents": true,
+    "compilerVersion": 3,
+    "splashscreen": {
+      "alwaysShowBeforeRender": true,
+      "waiting": true,
+      "autoclose": true,
+      "delay": 0
+    },
+    "distribute": {
+      "android": {},
+      "ios": {},
+      "sdkConfigs": {}
+    }
+  },
+  "mp-weixin": {
+    "appid": "wxea37430f513f5034",
+    "lazyCodeLoading": "requiredComponents",
+    "darkmode": true,
+    "themeLocation": "theme.json",
+    "setting": {
+      "urlCheck": false
+    },
+    "usingComponents": true
+  },
+  "h5": {
+    "router": {
+      "mode": "hash"
+    }
+  }
+}
