@@ -7,6 +7,7 @@
 ## 链接
 
 - GitHub 源码：<https://github.com/jelly-kits/jelly-ui-uniapp>
+- uni-app 版在线文档：<https://jelly-kits.github.io/jelly-ui-uniapp/>
 - H5 版在线文档：<https://jelly-kits.github.io/jelly-ui/>
 
 ## 特性

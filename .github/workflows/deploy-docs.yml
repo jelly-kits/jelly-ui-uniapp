@@ -7,11 +7,18 @@ name: Deploy docs
 # （#/pages/index/index）本来就在同一份 H5 构建里，不需要另建一套文档工程。
 #
 # 首次使用需要手动做一次：仓库 Settings → Pages → Source 选 “GitHub Actions”。
-# 之后推 main 自动发布，也可以在 Actions 页手动触发（workflow_dispatch）。
+# 之后推 main 自动发布（纯文档改动会跳过，见下方 paths-ignore），也可以在 Actions 页手动触发。
 
 on:
   push:
     branches: [main]
+    # 只改文档（README / LICENSE 等）时不重建：改说明文字没必要重发一次 Pages。
+    # 判定口径是「本次 push 涉及的文件全部命中忽略规则」才跳过 ——
+    # 只要夹带一个 src/ 下的文件，文档站照常重建。
+    # 需要强制部署时走 Actions 页的 “Run workflow”：workflow_dispatch 不受 paths 过滤影响。
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
   workflow_dispatch:
 
 # Pages 部署必需：id-token 给 deploy-pages 做 OIDC 校验
