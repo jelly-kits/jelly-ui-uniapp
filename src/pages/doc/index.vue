@@ -459,6 +459,13 @@ onLoad((options) => {
   overflow: hidden;
   background: linear-gradient(160deg, var(--je-bg-page-from), var(--je-bg-page-to));
   color: var(--je-text);
+  /*
+   * uni-app H5 端在 html/body 上内置了 user-select: none（模仿原生 App 的手感），
+   * 会一路继承下来，导致说明文字选不中、示例代码也没法手动选中复制。
+   * 文档站需要可选中，这里显式放开；右侧手机预览是独立文档，不受影响。
+   */
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* ---------- 窄屏顶栏（桌面端隐藏） ---------- */
