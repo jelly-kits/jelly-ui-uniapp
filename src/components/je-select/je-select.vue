@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 import type { JeSelectOption } from './types'
@@ -16,16 +18,27 @@ const props = withDefaults(
     placeholder?: string
     /** 禁用 */
     disabled?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: null,
     options: () => [],
     placeholder: '请选择',
     disabled: false,
+    size: undefined,
   },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-select--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const uid = useUid('je-select')
 const isOpen = ref(false)
@@ -177,7 +190,7 @@ onBeforeUnmount(() => {
   <view
     ref="rootRef"
     class="je-select"
-    :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
+    :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]"
     @keydown="onKeydown"
   >
     <view
@@ -202,7 +215,7 @@ onBeforeUnmount(() => {
         </slot>
       </text>
 
-      <text class="je-select__arrow" aria-hidden="true" />
+      <JeIcon class="je-select__arrow" name="chevron-down" :size="iconSize" />
     </view>
 
     <!-- 遮罩层同时吞掉穿透的滚动：小程序端没有 body，锁屏只能靠这里 -->
@@ -267,7 +280,10 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
+  box-sizing: border-box;
+  /* 定高 44px，与 je-input / je-button 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 16px;
   font-size: 15px;
   color: var(--je-text-faint);
   background: var(--je-surface);
@@ -281,6 +297,20 @@ onBeforeUnmount(() => {
 
 .je-select__trigger.has-value {
   color: var(--je-text);
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-select--small .je-select__trigger {
+  height: var(--je-touch-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.je-select--large .je-select__trigger {
+  height: var(--je-touch-h-lg);
+  padding: 0 20px;
+  font-size: 17px;
 }
 
 /* 聚焦与展开共用同一套高亮，键盘用户也能看清当前焦点 */
@@ -307,22 +337,15 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
+/* 右侧统一用 chevron-down 图标（与 je-picker / je-area 同款），展开时翻转 180°。
+   颜色不写死，跟着触发器的 color 走：空态是浅灰，has-value 时自动变正文色 */
 .je-select__arrow {
   flex-shrink: 0;
-  width: 12px;
-  height: 12px;
-  margin-top: -4px;
-  border-right: 2px solid var(--je-text-faint);
-  border-bottom: 2px solid var(--je-text-faint);
-  transform: rotate(45deg);
-  transition: transform 0.4s var(--je-ease-overshoot), margin-top 0.4s var(--je-ease-overshoot),
-    border-color var(--je-duration) ease;
+  transition: transform var(--je-duration) ease;
 }
 
 .je-select.is-open .je-select__arrow {
-  margin-top: 4px;
-  border-color: var(--je-text);
-  transform: rotate(-135deg);
+  transform: rotate(180deg);
 }
 
 .je-select__menu {
@@ -469,6 +492,7 @@ onBeforeUnmount(() => {
 
 @media (prefers-reduced-motion: reduce) {
   /* 展开 / 收起都直接切到位，不做过渡 */
+  .je-select__arrow,
   .je-select__menu,
   .je-select__menu.is-open,
   .je-select__scrim {

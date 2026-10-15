@@ -4,6 +4,7 @@ import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 import JeIcon from '../je-icon/je-icon.vue'
 import JeInput from '../je-input/je-input.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeAutoCompleteOption } from './types'
 
 defineOptions({ name: 'JeAutoComplete' })
@@ -24,6 +25,8 @@ const props = withDefaults(
     debounce?: number
     loadingText?: string
     emptyText?: string
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: '',
@@ -34,6 +37,7 @@ const props = withDefaults(
     debounce: 300,
     loadingText: '加载中…',
     emptyText: '无匹配结果',
+    size: undefined,
   },
 )
 
@@ -42,6 +46,10 @@ const emit = defineEmits<{
   select: [option: JeAutoCompleteOption]
   change: [value: string]
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-autocomplete--${size.value}`))
 
 const uid = useUid('je-autocomplete')
 const listId = `${uid}-listbox`
@@ -289,11 +297,12 @@ onBeforeUnmount(() => {
   <view
     ref="rootRef"
     class="je-autocomplete"
-    :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
+    :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]"
   >
     <view class="je-autocomplete__field">
       <JeInput
         class="je-autocomplete__input"
+        :size="size"
         :model-value="inputValue"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -390,6 +399,16 @@ onBeforeUnmount(() => {
 /* 有清空按钮时给输入框右侧留出空间（padding 由外框转交到内部控件上） */
 .je-autocomplete :deep(.je-input) {
   padding-right: 40px;
+}
+
+/* 尺寸三档：高度与字号由内部 JeInput 承担（size 已透传），这里只把清空按钮的让位区按档位收放。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-autocomplete--small :deep(.je-input) {
+  padding-right: 36px;
+}
+
+.je-autocomplete--large :deep(.je-input) {
+  padding-right: 44px;
 }
 
 .je-autocomplete__clear {

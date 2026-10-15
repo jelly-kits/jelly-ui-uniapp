@@ -6,29 +6,13 @@
  */
 import { ref } from 'vue'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 可滑动标签页：JeTab + JeTabItem */
 const jeTabActive = ref<string | number>('overview')
 </script>
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">可滑动标签页</text>
-      </view>
-    </view>
+    <doc-demo-bar title="可滑动标签页" route="tab-swipe" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="可滑动标签页" description="JeTab + JeTabItem（line 下划线跟随、内容可左右滑动）" inset>

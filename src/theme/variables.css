@@ -71,6 +71,18 @@ page {
   --je-radius: 14px;
   --je-radius-lg: 16px;
 
+  /*
+   * 表单控件高度（口径对齐 Vant 4：small 32 / default 44 / large 50）。
+   * default 的 44px 与 Vant 的 --van-button-default-height 一致，也是触控热区的下限。
+   *
+   * 主库要同时应付 PC 与触屏，所以分了 --je-control-* 与 --je-touch-* 两套；
+   * uni 版只有触屏一个形态，这里只保留触屏档。组件把本地高度变量
+   * （--jb-h / --ji-h ...）直接指到这里，「控件多高」只在这一处定义。
+   */
+  --je-touch-h-sm: 32px;
+  --je-touch-h: 44px;
+  --je-touch-h-lg: 50px;
+
   /* 阴影（中性） */
   --je-shadow-popup: 0 16px 48px rgba(15, 23, 42, 0.18);
 

@@ -126,8 +126,9 @@
  * 文档站右侧「手机预览」iframe：这个 iframe 以 ?preview=1 打开演示页，
  * main.ts 会据此给 <html> 加上 .je-preview。此时只留演示内容，去掉顶栏、
  * 并补回顶栏原本承担的上内边距，让演示从 iframe 顶部开始。
+ * 演示页的顶栏是 doc-demo-bar 组件，根节点类名是 .demo-bar。
  */
-.je-preview .doc__bar {
+.je-preview .demo-bar {
   display: none;
 }
 
@@ -147,6 +148,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/*
+ * 演示页顶栏（含右侧的 上一个 / 下一个 按钮）是 doc-demo-bar 组件，样式在组件自己的 <style> 里：
+ * 小程序端自定义组件与 app.wxss 样式隔离，全局这份进不去，也就不在这里重复写。
+ */
 
 /* 内容区：每页只渲染自己那一块，滚动交给它自己 */
 .doc__body {

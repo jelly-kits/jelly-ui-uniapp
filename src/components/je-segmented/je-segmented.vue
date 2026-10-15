@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeSegmentedOption } from './types'
 
 defineOptions({ name: 'JeSegmented' })
@@ -11,15 +12,21 @@ const props = withDefaults(
     disabled?: boolean
     /** 撑满父级宽度 */
     block?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   /*
    * options 虽然必传，但小程序端 props 是在首次 render 之后才注入的，
    * 不给默认值的话首帧会拿到 undefined，findIndex / length 直接抛 TypeError。
    */
-  { modelValue: null, options: () => [], disabled: false, block: false },
+  { modelValue: null, options: () => [], disabled: false, block: false, size: undefined },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-segmented--${size.value}`))
 
 const activeIndex = computed(() =>
   props.options.findIndex((option) => option.value === props.modelValue),
@@ -67,7 +74,7 @@ const onKeydown = (event: KeyboardEvent) => {
 <template>
   <div
     class="je-segmented"
-    :class="{ 'is-disabled': disabled, 'is-block': block }"
+    :class="[sizeClass, { 'is-disabled': disabled, 'is-block': block }]"
     role="radiogroup"
     @keydown="onKeydown"
   >
@@ -98,11 +105,33 @@ const onKeydown = (event: KeyboardEvent) => {
    */
   display: inline-flex;
   box-sizing: border-box;
+  /* 定高 44px，与 je-input / je-select 同一档；内边距是滑块相对外框的内缩 */
+  height: var(--je-touch-h);
   padding: 4px;
   font-family: inherit;
   background: var(--je-surface);
   border: var(--je-border);
   border-radius: var(--je-radius);
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、滑块都沿用基础样式。
+   滑块（.je-segmented__thumb）用的是 top/bottom 内缩，不用改 */
+.je-segmented--small {
+  height: var(--je-touch-h-sm);
+}
+
+.je-segmented--small .je-segmented__item {
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.je-segmented--large {
+  height: var(--je-touch-h-lg);
+}
+
+.je-segmented--large .je-segmented__item {
+  padding: 0 20px;
+  font-size: 15px;
 }
 
 .je-segmented.is-block {
@@ -129,7 +158,13 @@ const onKeydown = (event: KeyboardEvent) => {
   /* 各格等分容器宽度；min-width: 0 才能真正被压缩到等宽 */
   flex: 1 1 0;
   min-width: 0;
-  padding: 10px 16px;
+  /* 高度由外层定死（44px），这里只留左右内边距。
+     原生 button 自带 line-height: 2.55，不显式压掉会把格子撑高，所以这里也写明行高 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  line-height: 1.4;
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -173,8 +208,7 @@ const onKeydown = (event: KeyboardEvent) => {
   }
 
   .je-segmented__item {
-    min-height: 44px;
-    padding: 10px 8px;
+    padding: 0 8px;
     font-size: 13px;
   }
 }

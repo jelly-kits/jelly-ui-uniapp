@@ -32,3 +32,21 @@ const fallback: JeConfigContext = {
 export function useJeConfig(): JeConfigContext {
   return inject(jeConfigKey, null) ?? fallback
 }
+
+/**
+ * 解析组件尺寸，回退链：组件自身 prop → 祖先 JeConfigProvider → 'default'
+ * （uni 端没有应用级单例，比主库少一层 configureJelly）。
+ *
+ * 带尺寸的组件照抄这一行即可拿到响应式的生效尺寸：
+ *
+ *   const size = useJeConfigSize(() => props.size)
+ *
+ * ⚠️ 同时要把该 prop 在 `withDefaults` 里显式写成 `undefined`
+ * （不能给 'default' 之类兜底值，否则第一层就有值、全局配置永远落不下来）。
+ */
+export function useJeConfigSize(
+  own: () => JeConfigSize | undefined,
+): ComputedRef<JeConfigSize> {
+  const config = useJeConfig()
+  return computed(() => own() ?? config.size.value ?? 'default')
+}

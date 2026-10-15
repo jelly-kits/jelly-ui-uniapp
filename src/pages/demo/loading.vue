@@ -7,15 +7,6 @@
 import { onBeforeUnmount, ref } from 'vue'
 import { showLoading } from '../../components/je-loading'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /**
  * JeLoading：就地遮罩由 loading prop 控制；命令式那条走全局状态，
  * 需要页面里挂一个 <je-loading host /> 当宿主（小程序端没有 DOM 可以现场挂载）。
@@ -39,14 +30,7 @@ onBeforeUnmount(() => {
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">加载</text>
-      </view>
-    </view>
+    <doc-demo-bar title="加载" route="loading" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="加载" description="JeLoading" inset>

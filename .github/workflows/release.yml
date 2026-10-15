@@ -17,9 +17,10 @@ on:
     tags: ['v*']
 
 # id-token 是 OIDC 的全部前提，删掉就拿不到临时令牌。
-# contents: read 只够 checkout，发布权限由 npm 侧的信任关系授予，不需要写权限。
+# contents: write 是给「创建 GitHub Release」用的（发布说明从 CHANGELOG.md 抽）；
+# 发 npm 的权限由 npm 侧的信任关系授予，跟这一项无关。
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 # 发布不做并发取消：打断一个跑到一半的发布比排队更危险。
@@ -58,8 +59,22 @@ jobs:
             exit 1
           fi
 
+      # 先把更新说明抽出来。拿不到就直接失败 —— 绝不能走到「npm 已发、Release 没建」的半成品状态，
+      # 那种情况没法靠重跑工作流补救（npm publish 会因版本已存在而失败）。
+      # 顺带校验了「CHANGELOG 先改好再发版」这条约定：脚本找不到该版本号会退出 1。
+      - name: 抽取 CHANGELOG 里本版本的更新说明
+        run: node scripts/changelog-section.mjs "$GITHUB_REF_NAME" > /tmp/release-notes.md
+
       # prepack 会自动跑 build:pkg，把 src/ 下的组件、core、主题整理到包根，
       # 这里不需要再单独构建。可信发布会自动生成 provenance 签名，不需要 --provenance。
       # 预发布版本（如 0.2.0-beta.1）要另行加 --tag next，否则会盖掉正式版的 latest。
       - name: 发布到 npm
         run: npm publish
+
+      # 再用上一步抽好的正文建 GitHub Release，
+      # 让 <https://github.com/jelly-kits/jelly-ui-uniapp/releases> 就是给使用方看的更新说明。
+      # gh 是 ubuntu-latest 预装的，不必引入第三方 action。
+      - name: 发布 GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file /tmp/release-notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -2,6 +2,7 @@
 import { computed, inject, nextTick, onMounted, ref, useSlots, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
 import { jeFieldContextKey } from '../../core/form'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeIconName } from '../je-icon/icons'
 import type { JeInputProps } from './types'
 
@@ -18,7 +19,7 @@ const props = withDefaults(defineProps<JeInputProps>(), {
   showPassword: false,
   disabled: false,
   readonly: false,
-  size: 'default',
+  size: undefined,
   rows: 2,
   autosize: false,
   autocomplete: 'off',
@@ -60,6 +61,14 @@ const isFocused = ref(false)
 const passwordVisible = ref(false)
 
 /* ---------------------------------------------------------------- 尺寸与结构 */
+
+/** 尺寸：组件自身优先，再退回全局配置（JeConfigProvider）；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-input--${size.value}`))
+
+/** 前后缀 / 清空 / 密码图标随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const isTextarea = computed(() => props.type === 'textarea')
 const hasGroup = computed(() => Boolean(slots.prepend || slots.append))
@@ -339,7 +348,7 @@ onMounted(() => {
 })
 
 const fieldClasses = computed(() => [
-  props.size === 'default' ? '' : `je-input--${props.size}`,
+  sizeClass.value,
   {
     'is-focus': isFocused.value,
     'is-disabled': props.disabled,
@@ -363,7 +372,7 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
     <div class="je-input" :class="fieldClasses">
       <span v-if="showPrefix" class="je-input__prefix">
         <slot name="prefix">
-          <JeIcon v-if="prefixIconName" :name="prefixIconName" :size="16" />
+          <JeIcon v-if="prefixIconName" :name="prefixIconName" :size="iconSize" />
         </slot>
       </span>
 
@@ -462,7 +471,7 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
 
       <span v-if="hasSuffixArea" class="je-input__suffix">
         <slot name="suffix">
-          <JeIcon v-if="suffixIconName" :name="suffixIconName" :size="16" />
+          <JeIcon v-if="suffixIconName" :name="suffixIconName" :size="iconSize" />
         </slot>
 
         <button
@@ -474,7 +483,7 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
           @click="togglePassword"
         >
           <slot name="password-icon" :visible="passwordVisible">
-            <JeIcon :name="passwordVisible ? 'eye-off' : 'eye'" :size="16" />
+            <JeIcon :name="passwordVisible ? 'eye-off' : 'eye'" :size="iconSize" />
           </slot>
         </button>
 
@@ -485,7 +494,7 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
           aria-label="清空输入"
           @click="clear"
         >
-          <JeIcon v-if="clearIconName" :name="clearIconName" :size="16" />
+          <JeIcon v-if="clearIconName" :name="clearIconName" :size="iconSize" />
         </button>
 
         <span v-if="showCountInside" class="je-input__count">{{ wordLimitText }}</span>
@@ -528,7 +537,9 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
 }
 
 .je-input {
-  /* 尺寸只改这三个变量，default 不产生类名（避免与语义类撞名） */
+  /* 高度：default 直接取触屏档 token，small / large 只覆盖这几个变量。
+     --ji-py 只留给文本域（它由内容撑高），单行控件的高度一律由 --ji-h 定 */
+  --ji-h: var(--je-touch-h);
   --ji-py: 14px;
   --ji-px: 16px;
   --ji-fs: 15px;
@@ -537,7 +548,7 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: var(--ji-py) var(--ji-px);
+  padding: 0 var(--ji-px);
   font-family: inherit;
   font-size: var(--ji-fs);
   color: var(--je-text);
@@ -546,6 +557,17 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
   border-radius: var(--je-radius);
   transition: border-color var(--je-duration) ease, background var(--je-duration) ease,
     box-shadow var(--je-duration) ease;
+}
+
+/* 单行定高：与按钮 / 下拉在同一行严格对齐 */
+.je-input:not(.is-textarea) {
+  height: var(--ji-h);
+}
+
+/* 文本域由内容撑高，改用上下内边距 */
+.je-input.is-textarea {
+  padding-top: var(--ji-py);
+  padding-bottom: var(--ji-py);
 }
 
 /* 聚焦态的颜色全部由主色现算，换肤时自动跟随 */
@@ -565,12 +587,14 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
 }
 
 .je-input--large {
+  --ji-h: var(--je-touch-h-lg);
   --ji-py: 17px;
   --ji-px: 20px;
   --ji-fs: 17px;
 }
 
 .je-input--small {
+  --ji-h: var(--je-touch-h-sm);
   --ji-py: 9px;
   --ji-px: 12px;
   --ji-fs: 14px;
@@ -718,11 +742,22 @@ defineExpose({ input: inputRef, textarea: inputRef, passwordVisible, focus, blur
 
 @media (max-width: 768px) {
   .je-input {
-    /* 触控热区不小于 44px，字号 16px 避免 iOS 聚焦时自动放大 */
+    /* 字号 16px 避免 iOS 聚焦时自动放大页面；高度已由 --ji-h 钉在 44px，不用再兜 */
     --ji-py: 12px;
     --ji-px: 14px;
     --ji-fs: 16px;
-    min-height: 44px;
+  }
+
+  /* 尺寸档位在窄屏同样生效：small / large 回到各自档位的值，不被基础档覆盖 */
+  .je-input--small {
+    --ji-py: 9px;
+    --ji-px: 12px;
+  }
+
+  .je-input--large {
+    --ji-py: 17px;
+    --ji-px: 20px;
+    --ji-fs: 17px;
   }
 
   .je-input__clear,

@@ -7,15 +7,6 @@
 import { ref } from 'vue'
 import type { JeTreeNode } from '../../components/je-tree'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 树形控件：同一份数据供 JeTree 与 JeTreeSelect 复用 */
 const treeData: JeTreeNode[] = [
   {
@@ -41,14 +32,7 @@ const treeSelectValue = ref<string | number | null>(null)
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">树形选择</text>
-      </view>
-    </view>
+    <doc-demo-bar title="树形选择" route="tree-select" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="树形选择" description="JeTreeSelect（点开底部弹出树，选中后回填）" inset>

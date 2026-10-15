@@ -6,29 +6,13 @@
  */
 import { ref } from 'vue'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 下拉菜单：选中项通过 command 抛出 */
 const dropdownCommand = ref<string | number>('—')
 </script>
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">下拉菜单</text>
-      </view>
-    </view>
+    <doc-demo-bar title="下拉菜单" route="dropdown" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="下拉菜单" description="JeDropdown + JeDropdownItem（trigger 插槽 + command）" inset>

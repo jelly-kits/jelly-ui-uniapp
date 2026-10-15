@@ -11,7 +11,7 @@ export function createApp() {
   /*
    * 预览态：文档站右侧的手机框以 `#/pages/demo/xxx?preview=1` 打开演示页，
    * 在这个 iframe 里我们要的是「只有演示内容」，不要演示页自带的顶栏外壳。
-   * 这里给 <html> 打个标记，由 theme/demo.css 里的规则隐藏 .doc__bar。
+   * 这里给 <html> 打个标记，由 theme/demo.css 里的规则隐藏 .demo-bar（演示页顶栏组件）。
    */
   if (typeof window !== 'undefined' && window.location.hash.includes('preview=1')) {
     document.documentElement.classList.add('je-preview')

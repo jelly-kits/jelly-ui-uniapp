@@ -19,6 +19,7 @@ import { jePresets } from '../../core/presets'
 import { useSpring } from '../../core/useSpring'
 import JeIcon from '../je-icon/je-icon.vue'
 import type { JeIconName } from '../je-icon/icons'
+import { useJeConfigSize } from '../je-config-provider'
 import { jeButtonGroupKey, type JeButtonSize, type JeButtonType, type JeButtonVariant } from './types'
 
 defineOptions({ name: 'JeButton' })
@@ -97,11 +98,12 @@ const skin = computed<JeButtonVariant>(
   () => props.variant ?? props.type ?? group?.getType() ?? 'primary',
 )
 
-/** 尺寸：组件自身优先，其次是按钮组；default 不产生类名，避免和 default 皮肤撞名 */
-const sizeClass = computed(() => {
-  const size = props.size ?? group?.getSize() ?? 'default'
-  return size === 'default' ? '' : `je-button--${size}`
-})
+/**
+ * 尺寸：组件自身优先，其次是按钮组，再退回全局配置（JeConfigProvider）；
+ * default 不产生类名，避免和 default 皮肤撞名
+ */
+const size = useJeConfigSize(() => props.size ?? group?.getSize())
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-button--${size.value}`))
 
 /**
  * 组内位置：首尾圆角与 -1px 叠边由子按钮自己落地。小程序端样式隔离，
@@ -235,6 +237,11 @@ const onClick = (event: MouseEvent) => {
 
 <style scoped>
 .je-button {
+  /* 高度：default 直接取触屏档 token，small / large 只覆盖这几个变量。
+     高度写死、左右内边距撑宽度，与 Vant 按钮同一套做法 —— 字号变了高度也不会跟着飘 */
+  --jb-h: var(--je-touch-h);
+  --jb-px: 28px;
+  --jb-fs: 16px;
   position: relative;
   box-sizing: border-box;
   display: inline-flex;
@@ -245,9 +252,10 @@ const onClick = (event: MouseEvent) => {
      在 flex 行里会变成自动外边距把按钮顶到中间，压掉页脚/工具栏的 justify-content。
      这里显式清零；需要居中的场景由父级的 text-align / justify-content 负责 */
   margin: 0;
-  padding: var(--jb-py, 15px) var(--jb-px, 28px);
+  height: var(--jb-h);
+  padding: 0 var(--jb-px);
   font-family: inherit;
-  font-size: var(--jb-fs, 16px);
+  font-size: var(--jb-fs);
   font-weight: 700;
   line-height: 1.2;
   border: 1px solid transparent;
@@ -429,17 +437,15 @@ const onClick = (event: MouseEvent) => {
 
 /* 尺寸：default 不产生类名，避免和 default 皮肤撞名 */
 .je-button--large {
-  --jb-py: 17px;
+  --jb-h: var(--je-touch-h-lg);
   --jb-px: 34px;
   --jb-fs: 17px;
-  --jb-size: 56px;
 }
 
 .je-button--small {
-  --jb-py: 9px;
+  --jb-h: var(--je-touch-h-sm);
   --jb-px: 16px;
   --jb-fs: 14px;
-  --jb-size: 38px;
 }
 
 .je-button--round {
@@ -450,10 +456,10 @@ const onClick = (event: MouseEvent) => {
   border-radius: 999px 999px 40% 40%;
 }
 
-/* 正圆：内容只有图标，尺寸靠 --jb-size 定死 */
+/* 正圆：内容只有图标，边长跟随高度档位 */
 .je-button--circle {
-  width: var(--jb-size, 50px);
-  height: var(--jb-size, 50px);
+  width: var(--jb-h);
+  height: var(--jb-h);
   padding: 0;
   border-radius: 50%;
 }
@@ -523,12 +529,8 @@ const onClick = (event: MouseEvent) => {
   outline-offset: 3px;
 }
 
-/* 触屏上把热区兜到 44px，与项目内其它控件的可达性约定一致 */
-@media (max-width: 768px) {
-  .je-button {
-    min-height: 44px;
-  }
-}
+/* 尺寸不需要再挂 @media：uni 版只有触屏一个形态，上面的 --je-touch-h-* 就是触屏档，
+   default 44px 本身已经落在可达性下限上 */
 
 /* 「减弱动效」不在这里处理：内核检测到该偏好时会直接跳到目标值，不做插值 */
 </style>

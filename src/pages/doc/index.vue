@@ -43,6 +43,21 @@ const items = sectionGroups.flatMap((group) =>
 
 const componentCount = items.length
 
+/**
+ * 菜单里的组件代码名：由 api-data.ts 的 routeApi 派生（je-button → Button），
+ * 不在 sections.ts 里再维护一份。一个页面挂多个组件时取第一个，
+ * 足够提示「这页讲的是哪个组件」；没有对应组件的页面（总览 / Install）返回空串。
+ */
+const codeNameOf = (route: string) => {
+  const tag = routeApi[route]?.[0]
+  if (!tag) return ''
+  return tag
+    .replace(/^je-/, '')
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('')
+}
+
 const current = ref(OVERVIEW)
 const isOverview = computed(() => current.value === OVERVIEW)
 const isInstall = computed(() => current.value === INSTALL)
@@ -58,7 +73,11 @@ const filteredGroups = computed(() => {
   return sectionGroups
     .map((group) => ({
       title: group.title,
-      items: group.items.filter((item) => item.title.toLowerCase().includes(keyword)),
+      items: group.items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(keyword) ||
+          codeNameOf(item.route).toLowerCase().includes(keyword),
+      ),
     }))
     .filter((group) => group.items.length > 0)
 })
@@ -173,13 +192,24 @@ const select = (route: string) => {
 
 /* --------------------------------- 外链 --------------------------------- */
 
-/** 仓库与在线文档：总览页顶部的两个入口 */
+/** 仓库与在线文档：总览页顶部的两个外链入口 */
 const GITHUB_URL = 'https://github.com/jelly-kits/jelly-ui-uniapp'
 const DOCS_URL = 'https://jelly-kits.github.io/jelly-ui/'
 
 const openLink = (url: string) => {
   // 本页只在 H5 端注册，直接用 window 打开新标签即可
   if (typeof window !== 'undefined') window.open(url, '_blank', 'noopener')
+}
+
+/**
+ * 演示入口页是独立页面（容器：pages/demo/index），不走文档站内部状态。
+ * 同样另开标签页：在文档站里跳走会把正在看的文档顶掉。
+ */
+const openDemoEntry = () => {
+  if (typeof window === 'undefined') return
+  // H5 是 hash 路由，按 syncUrl 的写法拼出要打开的地址
+  const { pathname, search } = window.location
+  window.open(`${pathname}${search}#/pages/demo/index`, '_blank', 'noopener')
 }
 
 /* --------------------------------- 主题 --------------------------------- */
@@ -278,8 +308,7 @@ onLoad((options) => {
             class="docsite__item"
             :class="{ 'docsite__item--active': item.route === current }"
             @tap="select(item.route)"
-            >{{ item.title }}</text
-          >
+          ><text v-if="codeNameOf(item.route)" class="docsite__item-code">{{ codeNameOf(item.route) }}</text>{{ item.title }}</text>
         </view>
       </view>
     </view>
@@ -296,6 +325,10 @@ onLoad((options) => {
             <view class="docsite__hero-link" @tap="openLink(GITHUB_URL)">
               <je-icon name="github" :size="16" />
               <text class="docsite__hero-link-text">GitHub 源码</text>
+            </view>
+            <view class="docsite__hero-link" @tap="openDemoEntry">
+              <je-icon name="play" :size="16" />
+              <text class="docsite__hero-link-text">组件演示</text>
             </view>
             <view class="docsite__hero-link" @tap="openLink(DOCS_URL)">
               <je-icon name="external-link" :size="16" />
@@ -606,6 +639,18 @@ onLoad((options) => {
   color: var(--je-text-muted);
   border-radius: 8px;
   cursor: pointer;
+}
+
+.docsite__item-code {
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--je-text-faint);
+}
+
+/* 选中项底色是渐变，代码名跟着正文走浅色，只用透明度拉开层次 */
+.docsite__item--active .docsite__item-code {
+  color: inherit;
+  opacity: 0.75;
 }
 
 .docsite__item:hover {

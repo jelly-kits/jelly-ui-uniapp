@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 
 defineOptions({ name: 'JeSlider' })
 
@@ -12,11 +13,25 @@ const props = withDefaults(
     step?: number
     disabled?: boolean
     showTooltip?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
-  { modelValue: 0, min: 0, max: 100, step: 1, disabled: false, showTooltip: true },
+  {
+    modelValue: 0,
+    min: 0,
+    max: 100,
+    step: 1,
+    disabled: false,
+    showTooltip: true,
+    size: undefined,
+  },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: number | number[]] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-slider--${size.value}`))
 
 /** 小程序端拿不到 DOM 引用，几何靠 SelectorQuery 量；H5 下才是真实元素 */
 const trackRef = ref<HTMLElement | null>(null)
@@ -252,7 +267,7 @@ const onKeydown = (event: KeyboardEvent, index: number) => {
 </script>
 
 <template>
-  <view class="je-slider" :class="{ 'is-disabled': disabled, 'is-range': isRange }">
+  <view class="je-slider" :class="[sizeClass, { 'is-disabled': disabled, 'is-range': isRange }]">
     <view ref="trackRef" class="je-slider__track">
       <view class="je-slider__fill" :style="fillStyle" />
 
@@ -393,6 +408,34 @@ const onKeydown = (event: KeyboardEvent, index: number) => {
 
 .je-slider.is-disabled {
   opacity: 0.5;
+}
+
+/* 尺寸两档：轨道粗细与把手同步缩放。把手靠 translate(-50%, -50%) 居中，
+   改宽高后依然垂直居中，无需另写定位；default 档即上面的基础样式 */
+.je-slider--small .je-slider__track {
+  height: 4px;
+}
+
+.je-slider--small .je-slider__thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.je-slider--small .je-slider__tooltip {
+  font-size: 11px;
+}
+
+.je-slider--large .je-slider__track {
+  height: 8px;
+}
+
+.je-slider--large .je-slider__thumb {
+  width: 24px;
+  height: 24px;
+}
+
+.je-slider--large .je-slider__tooltip {
+  font-size: 13px;
 }
 
 @media (max-width: 768px) {

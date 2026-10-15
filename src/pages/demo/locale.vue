@@ -7,15 +7,6 @@
 import { computed, ref } from 'vue'
 import { registerJellyLocale, resolveLocale } from '../../components/je-locale'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /*
  * 演示「注册自定义语言」：registerJellyLocale(名字, 语言包)。
  * 只需写要覆盖的字段，其余字段回落简体中文；注册后就像内置语言一样按语言名下发。
@@ -51,14 +42,7 @@ const rows = computed(() => {
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">语言包</text>
-      </view>
-    </view>
+    <doc-demo-bar title="语言包" route="locale" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group

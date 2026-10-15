@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 
 defineOptions({ name: 'JeSearch' })
 
@@ -23,6 +24,8 @@ const props = withDefaults(
     cancelText?: string
     /** 有内容时显示清除按钮 */
     clearable?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: '',
@@ -35,6 +38,7 @@ const props = withDefaults(
     showCancel: false,
     cancelText: '取消',
     clearable: true,
+    size: undefined,
   },
 )
 
@@ -49,6 +53,14 @@ const emit = defineEmits<{
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-search--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const focused = ref(false)
 /** 仅 H5 用来在「清除」后把焦点还回输入框，小程序端不持有 DOM 引用 */
@@ -104,11 +116,11 @@ const onBlur = (event: FocusEvent) => {
 <template>
   <div
     class="je-search"
-    :class="[`je-search--${shape}`, { 'is-focused': focused, 'is-disabled': disabled }]"
+    :class="[sizeClass, `je-search--${shape}`, { 'is-focused': focused, 'is-disabled': disabled }]"
     :style="rootStyle"
   >
     <div class="je-search__field">
-      <JeIcon class="je-search__icon" name="search" :size="16" />
+      <JeIcon class="je-search__icon" name="search" :size="iconSize" />
 
       <input
         ref="inputRef"
@@ -172,6 +184,42 @@ const onBlur = (event: FocusEvent) => {
   background: var(--je-search-bg);
   border: 1.5px solid transparent;
   transition: border-color var(--je-duration) ease, box-shadow var(--je-duration) ease;
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐。
+   高度承载元素是 .je-search__field（外层输入容器），取消按钮同步跟齐 */
+.je-search--small .je-search__field,
+.je-search--small .je-search__cancel {
+  height: var(--je-touch-h-sm);
+}
+
+.je-search--small .je-search__field {
+  padding: 0 10px;
+}
+
+/* H5 下 uni 会把 <input> 包成 uni-input，真实输入框与自绘占位符有独立字号，需一并覆盖 */
+.je-search--small .je-search__input,
+.je-search--small .je-search__cancel,
+.je-search--small :deep(.uni-input-input),
+.je-search--small :deep(.uni-input-placeholder) {
+  font-size: 14px;
+}
+
+.je-search--large .je-search__field,
+.je-search--large .je-search__cancel {
+  height: var(--je-touch-h-lg);
+}
+
+.je-search--large .je-search__field {
+  padding: 0 18px;
+}
+
+.je-search--large .je-search__input,
+.je-search--large .je-search__cancel,
+.je-search--large :deep(.uni-input-input),
+.je-search--large :deep(.uni-input-placeholder) {
+  font-size: 17px;
 }
 
 .je-search--round .je-search__field {

@@ -4,15 +4,6 @@
  * 由 pages/index/index.vue 拆出，只保留本页这一个演示区块用到的状态。
  * 外壳样式与演示排版在全局 src/theme/demo.css 里。
  */
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /*
  * 页面真正滚动的是内容区那个 scroll-view 的内部节点（不是 window），
  * 锚点的滚动定位与高亮必须显式指向它，否则点击与联动都监听不到。
@@ -57,14 +48,7 @@ const anchorSections = [
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">锚点</text>
-      </view>
-    </view>
+    <doc-demo-bar title="锚点" route="anchor" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="锚点" description="JeAnchor + JeAnchorLink（点文字滚到对应段落）" inset>

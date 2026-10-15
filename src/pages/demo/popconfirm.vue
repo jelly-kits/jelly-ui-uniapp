@@ -6,15 +6,6 @@
  */
 import { ref } from 'vue'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 气泡确认：受控开合 + 结果回显 */
 const popconfirmVisible = ref(false)
 
@@ -23,14 +14,7 @@ const popconfirmLog = ref('—')
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">气泡确认</text>
-      </view>
-    </view>
+    <doc-demo-bar title="气泡确认" route="popconfirm" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="气泡确认" description="JePopconfirm（气泡贴着触发按钮弹出，带箭头）" inset>

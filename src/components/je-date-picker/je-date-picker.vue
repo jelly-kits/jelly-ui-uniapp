@@ -3,6 +3,7 @@ import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import {
   addMonths,
   formatDate,
@@ -40,6 +41,8 @@ const props = withDefaults(
     disabledDate?: (date: Date) => boolean
     /** 一周起始日，0 = 周日，1 = 周一 */
     weekStart?: number
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: null,
@@ -48,6 +51,7 @@ const props = withDefaults(
     disabled: false,
     clearable: true,
     weekStart: 1,
+    size: undefined,
   },
 )
 
@@ -56,6 +60,14 @@ const emit = defineEmits<{
   change: [value: JeDatePickerModelValue]
   clear: []
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-date-picker--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const uid = useUid('je-date')
 /** 小程序端拿不到 DOM 引用，两列时间的位置靠 SelectorQuery 量；H5 下才是真实元素 */
@@ -542,7 +554,7 @@ const panelStyle = computed(() => {
   <view
     ref="rootRef"
     class="je-date-picker"
-    :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
+    :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]"
   >
     <view
       ref="triggerRef"
@@ -566,7 +578,7 @@ const panelStyle = computed(() => {
       >
         <JeIcon name="close" :size="14" />
       </button>
-      <text class="je-date-picker__arrow" aria-hidden="true" />
+      <JeIcon class="je-date-picker__arrow" name="chevron-down" :size="iconSize" />
     </view>
 
     <!-- 遮罩层同时吞掉穿透的滚动：小程序端没有 body，锁屏只能靠这里 -->
@@ -767,7 +779,9 @@ const panelStyle = computed(() => {
   gap: 10px;
   box-sizing: border-box;
   width: 100%;
-  padding: 14px 16px;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 16px;
   font-size: 15px;
   color: var(--je-text-faint);
   background: var(--je-surface);
@@ -777,6 +791,20 @@ const panelStyle = computed(() => {
   outline: none;
   transition: border-color var(--je-duration) ease, background var(--je-duration) ease,
     box-shadow var(--je-duration) ease;
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-date-picker--small .je-date-picker__trigger {
+  height: var(--je-touch-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.je-date-picker--large .je-date-picker__trigger {
+  height: var(--je-touch-h-lg);
+  padding: 0 20px;
+  font-size: 17px;
 }
 
 /* 小程序原生 button 自带 ::after 描边，这里压掉，避免多出一圈细边 */
@@ -829,22 +857,15 @@ const panelStyle = computed(() => {
   background: var(--je-surface-hover);
 }
 
+/* 右侧统一用 chevron-down 图标（与 je-picker / je-select 同款），展开时翻转 180°。
+   颜色不写死，跟着触发器的 color 走：空态是浅灰，has-value 时自动变正文色 */
 .je-date-picker__arrow {
   flex-shrink: 0;
-  width: 12px;
-  height: 12px;
-  margin-top: -4px;
-  border-right: 2px solid var(--je-text-faint);
-  border-bottom: 2px solid var(--je-text-faint);
-  transform: rotate(45deg);
-  transition: transform 0.4s var(--je-ease-overshoot), margin-top 0.4s var(--je-ease-overshoot),
-    border-color var(--je-duration) ease;
+  transition: transform var(--je-duration) ease;
 }
 
 .je-date-picker.is-open .je-date-picker__arrow {
-  margin-top: 4px;
-  border-color: var(--je-text);
-  transform: rotate(-135deg);
+  transform: rotate(180deg);
 }
 
 .je-date-picker.is-disabled .je-date-picker__trigger {

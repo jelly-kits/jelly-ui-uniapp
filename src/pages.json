@@ -19,6 +19,12 @@
       }
     },
     {
+      "path": "pages/demo/index",
+      "style": {
+        "navigationBarTitleText": "组件演示"
+      }
+    },
+    {
       "path": "pages/demo/button",
       "style": {
         "navigationBarTitleText": "按钮"

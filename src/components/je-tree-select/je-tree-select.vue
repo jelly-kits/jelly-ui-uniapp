@@ -4,6 +4,7 @@ import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 import JeIcon from '../je-icon/je-icon.vue'
 import JeTree from '../je-tree/je-tree.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeTreeNode } from '../je-tree/types'
 import type { JeTreeSelectValue } from './types'
 
@@ -17,6 +18,10 @@ const props = withDefaults(
     disabled?: boolean
     clearable?: boolean
     accordion?: boolean
+    /** 面板里的树初始是否展开所有节点 */
+    defaultExpandAll?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: null,
@@ -24,6 +29,8 @@ const props = withDefaults(
     disabled: false,
     clearable: true,
     accordion: false,
+    defaultExpandAll: true,
+    size: undefined,
   },
 )
 
@@ -32,6 +39,14 @@ const emit = defineEmits<{
   change: [value: JeTreeSelectValue]
   clear: []
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-tree-select--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const uid = useUid('je-tree-select')
 const panelId = `${uid}-panel`
@@ -202,7 +217,7 @@ onBeforeUnmount(() => {
   <view
     ref="rootRef"
     class="je-tree-select"
-    :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
+    :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]"
     @keydown="onKeydown"
   >
     <view
@@ -228,7 +243,7 @@ onBeforeUnmount(() => {
         <JeIcon name="close" :size="14" />
       </button>
 
-      <text class="je-tree-select__arrow" aria-hidden="true" />
+      <JeIcon class="je-tree-select__arrow" name="chevron-down" :size="iconSize" />
     </view>
 
     <!-- 遮罩层同时吞掉穿透的滚动：小程序端没有 body，锁屏只能靠这里 -->
@@ -267,6 +282,7 @@ onBeforeUnmount(() => {
           :data="data"
           :model-value="selectedKeys"
           :accordion="accordion"
+          :default-expand-all="defaultExpandAll"
           :expand-on-click-node="false"
           @node-click="selectNode"
         />
@@ -288,8 +304,10 @@ onBeforeUnmount(() => {
   gap: 10px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 44px;
-  padding: 12px 16px;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑。
+     标签本身是单行省略（white-space: nowrap），不会有多行撑高的情况 */
+  height: var(--je-touch-h);
+  padding: 0 16px;
   font-size: 15px;
   color: var(--je-text-faint);
   background: var(--je-surface);
@@ -303,6 +321,20 @@ onBeforeUnmount(() => {
 
 .je-tree-select__trigger.has-value {
   color: var(--je-text);
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-tree-select--small .je-tree-select__trigger {
+  height: var(--je-touch-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.je-tree-select--large .je-tree-select__trigger {
+  height: var(--je-touch-h-lg);
+  padding: 0 20px;
+  font-size: 17px;
 }
 
 /* 聚焦与展开共用高亮，键盘用户也看得见 */
@@ -348,23 +380,15 @@ onBeforeUnmount(() => {
   background: var(--je-surface-hover);
 }
 
-/* 箭头是 CSS 画的小折角，展开时翻转 */
+/* 右侧统一用 chevron-down 图标（与 je-picker / je-select 同款），展开时翻转 180°。
+   颜色不写死，跟着触发器的 color 走：空态是浅灰，has-value 时自动变正文色 */
 .je-tree-select__arrow {
   flex-shrink: 0;
-  width: 12px;
-  height: 12px;
-  margin-top: -4px;
-  border-right: 2px solid var(--je-text-faint);
-  border-bottom: 2px solid var(--je-text-faint);
-  transform: rotate(45deg);
-  transition: transform 0.4s var(--je-ease-overshoot), margin-top 0.4s var(--je-ease-overshoot),
-    border-color var(--je-duration) ease;
+  transition: transform var(--je-duration) ease;
 }
 
 .je-tree-select.is-open .je-tree-select__arrow {
-  margin-top: 4px;
-  border-color: var(--je-text);
-  transform: rotate(-135deg);
+  transform: rotate(180deg);
 }
 
 .je-tree-select.is-disabled .je-tree-select__trigger {

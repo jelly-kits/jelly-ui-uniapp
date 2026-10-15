@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 
@@ -15,6 +16,8 @@ const props = withDefaults(
     minuteStep?: number
     placeholder?: string
     disabled?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: null,
@@ -22,10 +25,15 @@ const props = withDefaults(
     minuteStep: 5,
     placeholder: '请选择时间',
     disabled: false,
+    size: undefined,
   },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-time--${size.value}`))
 
 const uid = useUid('je-time')
 /** 小程序端拿不到 DOM 引用，两列的位置靠 SelectorQuery 量；H5 下才是真实元素 */
@@ -246,7 +254,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <view ref="rootRef" class="je-time" :class="{ 'is-open': isOpen, 'is-disabled': disabled }">
+  <view ref="rootRef" class="je-time" :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]">
     <button
       type="button"
       class="je-time__trigger"
@@ -373,7 +381,9 @@ onBeforeUnmount(() => {
   width: 100%;
   /* 两端原生 button 都自带 margin-left/right: auto，显式清零避免被自动外边距顶偏 */
   margin: 0;
-  padding: 14px 16px;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 16px;
   font-family: inherit;
   font-size: 15px;
   line-height: 1.4;
@@ -395,6 +405,20 @@ onBeforeUnmount(() => {
 
 .je-time__trigger.has-value {
   color: var(--je-text);
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-time--small .je-time__trigger {
+  height: var(--je-touch-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.je-time--large .je-time__trigger {
+  height: var(--je-touch-h-lg);
+  padding: 0 20px;
+  font-size: 17px;
 }
 
 .je-time__trigger:focus-visible,

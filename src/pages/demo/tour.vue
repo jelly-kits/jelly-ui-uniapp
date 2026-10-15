@@ -7,15 +7,6 @@
 import { ref } from 'vue'
 import type { JeTourStep } from '../../components/je-tour'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 漫游式引导：目标为演示页里带 id 的元素 */
 const tourVisible = ref(false)
 
@@ -27,14 +18,7 @@ const tourSteps: JeTourStep[] = [
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">漫游式引导</text>
-      </view>
-    </view>
+    <doc-demo-bar title="漫游式引导" route="tour" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="漫游式引导" description="JeTour（点开始，遮罩高亮目标元素并逐步引导）" inset>

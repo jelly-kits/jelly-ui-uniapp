@@ -417,26 +417,35 @@ const onJump = () => {
   opacity: 0.6;
 }
 
-/* 窄屏：热区统一拉到 44px，页码已由 JS 精简为 prev / 当前页 / next */
+/* 窄屏：热区兜到 44px，页码已由 JS 精简为 prev / 当前页 / next；
+   small 是刻意收紧的一档，只收一档到 32px，不跟着兜底 */
 @media (max-width: 768px) {
   .je-pagination {
     gap: 6px;
   }
 
   .je-pagination__btn,
-  .je-pagination.is-small .je-pagination__btn,
   .je-pagination__sizes :deep(.je-dropdown__trigger),
-  .je-pagination.is-small .je-pagination__sizes :deep(.je-dropdown__trigger),
-  .je-pagination__input,
-  .je-pagination.is-small .je-pagination__input {
+  .je-pagination__input {
     min-width: 44px;
     min-height: 44px;
     height: 44px;
   }
 
-  .je-pagination__ellipsis,
-  .je-pagination.is-small .je-pagination__ellipsis {
+  .je-pagination__ellipsis {
     height: 44px;
+  }
+
+  .je-pagination.is-small .je-pagination__btn,
+  .je-pagination.is-small .je-pagination__sizes :deep(.je-dropdown__trigger),
+  .je-pagination.is-small .je-pagination__input {
+    min-width: 32px;
+    min-height: 32px;
+    height: 32px;
+  }
+
+  .je-pagination.is-small .je-pagination__ellipsis {
+    height: 32px;
   }
 }
 

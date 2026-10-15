@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 
 defineOptions({ name: 'JePasswordInput' })
 
@@ -40,6 +41,8 @@ const props = withDefaults(
      * 它只放宽显示条件，不改变光标落点——光标始终停在下一个待填的格子上。
      */
     always?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: '',
@@ -56,6 +59,7 @@ const props = withDefaults(
     clearable: false,
     autofocus: false,
     always: false,
+    size: undefined,
   },
 )
 
@@ -75,6 +79,10 @@ const emit = defineEmits<{
   /** 输入位数达到 length 时触发，可用于自动提交 */
   complete: [value: string]
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-password--${size.value}`))
 
 /** H5 下模板 ref 是 uni-input 组件实例（真实节点挂在 $el 上），暴露了 focus / blur */
 interface InputHost {
@@ -313,11 +321,11 @@ defineExpose({
 <template>
   <view
     class="je-password"
-    :class="{
+    :class="[sizeClass, {
       'is-focused': active,
       'is-error': !!errorInfo,
       'is-disabled': disabled,
-    }"
+    }]"
     :style="rootStyle"
   >
     <view class="je-password__cells" :class="{ 'has-gutter': hasGutter }" @tap="onCellClick">
@@ -436,6 +444,24 @@ defineExpose({
   box-sizing: border-box;
   min-width: 0;
   height: 48px;
+}
+
+/* 尺寸三档：只覆盖格子高度与字符字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-password--small .je-password__cell {
+  height: var(--je-touch-h-sm);
+}
+
+.je-password--small .je-password__char {
+  font-size: 17px;
+}
+
+.je-password--large .je-password__cell {
+  height: var(--je-touch-h-lg);
+}
+
+.je-password--large .je-password__char {
+  font-size: 20px;
 }
 
 /* gutter 为 0 时相邻格子共用一条描边，避免叠成 2px */

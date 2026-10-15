@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeRadioOption } from './types'
 
 defineOptions({ name: 'JeRadioGroup' })
@@ -11,11 +12,17 @@ const props = withDefaults(
     /** 原生 radio 的 name，不传则自动生成 */
     name?: string
     disabled?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
-  { modelValue: null, options: () => [], disabled: false },
+  { modelValue: null, options: () => [], disabled: false, size: undefined },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-radio-group--${size.value}`))
 
 /** 模块级自增代替 useId：uni 的 vue 运行时（小程序端）没有导出 useId */
 let radioSeq = 0
@@ -46,7 +53,7 @@ const select = (option: JeRadioOption) => {
 </script>
 
 <template>
-  <view class="je-radio-group" :class="{ 'is-disabled': disabled }" role="radiogroup">
+  <view class="je-radio-group" :class="[sizeClass, { 'is-disabled': disabled }]" role="radiogroup">
     <view
       v-for="option in options"
       :key="option.value"
@@ -77,9 +84,12 @@ const select = (option: JeRadioOption) => {
 
 <style scoped>
 .je-radio-group {
+  /* 一行排多个，放不下自动换行，不浪费右侧空白。
+     间距与内边距都取得比较紧：窄屏（375px）下选项所在容器常常只有 190px 上下，
+     之前 12px 间距 + 14px 水平内边距会让一项占到 92px，两个刚好放不下、被挤成一行一个 */
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .je-radio {
@@ -87,13 +97,29 @@ const select = (option: JeRadioOption) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  box-sizing: border-box;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 10px;
   background: var(--je-surface);
   border: 1.5px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   user-select: none;
   transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式 */
+.je-radio-group--small .je-radio {
+  height: var(--je-touch-h-sm);
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+.je-radio-group--large .je-radio {
+  height: var(--je-touch-h-lg);
+  padding: 0 14px;
+  font-size: 16px;
 }
 
 .je-radio:hover {

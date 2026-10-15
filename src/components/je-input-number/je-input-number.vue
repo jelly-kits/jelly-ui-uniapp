@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 
 defineOptions({ name: 'JeInputNumber' })
 
@@ -16,6 +17,8 @@ const props = withDefaults(
     disabled?: boolean
     /** 是否显示加减按钮 */
     controls?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: null,
@@ -25,10 +28,15 @@ const props = withDefaults(
     placeholder: '',
     disabled: false,
     controls: true,
+    size: undefined,
   },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: number | null] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-number--${size.value}`))
 
 const decimalsOf = (value: number) => {
   const text = String(value)
@@ -121,7 +129,7 @@ const atMax = computed(() => typeof props.modelValue === 'number' && props.model
 </script>
 
 <template>
-  <div class="je-number" :class="{ 'is-disabled': disabled, 'has-controls': controls }">
+  <div class="je-number" :class="[sizeClass, { 'is-disabled': disabled, 'has-controls': controls }]">
     <button
       v-if="controls"
       type="button"
@@ -167,6 +175,8 @@ const atMax = computed(() => typeof props.modelValue === 'number' && props.model
   display: flex;
   align-items: stretch;
   box-sizing: border-box;
+  /* 定高 44px，与 je-input / je-button 同一档；输入区靠 stretch 撑满 */
+  height: var(--je-touch-h);
   overflow: hidden;
   background: var(--je-surface);
   border: 1.5px solid var(--je-border-color);
@@ -181,10 +191,53 @@ const atMax = computed(() => typeof props.modelValue === 'number' && props.model
   box-shadow: 0 8px 24px color-mix(in srgb, var(--je-primary) 25%, transparent);
 }
 
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐。
+   外层定高，内部输入区与加减按钮同步收放，按钮宽度跟着档位走 */
+.je-number--small {
+  height: var(--je-touch-h-sm);
+}
+
+.je-number--small .je-number__input {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+/* H5 下 uni 会把 <input> 包成 uni-input，真实输入框与自绘占位符有独立字号，需一并覆盖 */
+.je-number--small :deep(.uni-input-input),
+.je-number--small :deep(.uni-input-placeholder) {
+  font-size: 14px;
+}
+
+.je-number--small .je-number__btn {
+  width: 36px;
+  font-size: 15px;
+}
+
+.je-number--large {
+  height: var(--je-touch-h-lg);
+}
+
+.je-number--large .je-number__input {
+  padding: 0 16px;
+  font-size: 17px;
+}
+
+.je-number--large :deep(.uni-input-input),
+.je-number--large :deep(.uni-input-placeholder) {
+  font-size: 17px;
+}
+
+.je-number--large .je-number__btn {
+  width: 52px;
+  font-size: 17px;
+}
+
 .je-number__input {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 14px 12px;
+  /* 高度由外层定死，这里只留左右内边距 */
+  padding: 0 12px;
   font-family: inherit;
   font-size: 15px;
   color: var(--je-text);
@@ -267,7 +320,7 @@ const atMax = computed(() => typeof props.modelValue === 'number' && props.model
 /* 窄屏放大热区，保证单指点击不误触 */
 @media (max-width: 768px) {
   .je-number__input {
-    padding: 15px 10px;
+    padding: 0 10px;
   }
 
   .je-number__btn {

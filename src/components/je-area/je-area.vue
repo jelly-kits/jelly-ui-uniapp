@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeAreaOption } from './types'
 
 defineOptions({ name: 'JeArea' })
@@ -28,6 +29,8 @@ const props = withDefaults(
     visibleItemCount?: number
     itemHeight?: number
     closeOnClickModal?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
   {
     modelValue: () => [],
@@ -43,6 +46,7 @@ const props = withDefaults(
     visibleItemCount: 5,
     itemHeight: 44,
     closeOnClickModal: true,
+    size: undefined,
   },
 )
 
@@ -55,6 +59,14 @@ const emit = defineEmits<{
   /** 点击取消或遮罩 */
   cancel: []
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-area--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 const isOpen = ref(false)
 const activeTab = ref(0)
@@ -281,7 +293,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <view class="je-area" :class="{ 'is-open': isOpen, 'is-disabled': disabled }">
+  <view class="je-area" :class="[sizeClass, { 'is-open': isOpen, 'is-disabled': disabled }]">
     <button
       type="button"
       class="je-area__trigger"
@@ -292,7 +304,7 @@ onBeforeUnmount(() => {
       @tap="toggle"
     >
       <text class="je-area__label">{{ triggerLabel || placeholder }}</text>
-      <JeIcon class="je-area__arrow" name="chevron-down" :size="16" />
+      <JeIcon class="je-area__arrow" name="chevron-down" :size="iconSize" />
     </button>
 
     <view class="je-area__sheet" :class="{ 'is-open': isOpen }" :style="{ zIndex }">
@@ -399,7 +411,9 @@ onBeforeUnmount(() => {
   width: 100%;
   /* 两端原生 button 都自带 margin-left/right: auto，显式清零避免被自动外边距顶偏 */
   margin: 0;
-  padding: 14px 16px;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 16px;
   font-family: inherit;
   font-size: 15px;
   line-height: 1.4;
@@ -411,6 +425,20 @@ onBeforeUnmount(() => {
   outline: none;
   transition: border-color var(--je-duration) ease, background var(--je-duration) ease,
     box-shadow var(--je-duration) ease;
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式。
+   三档与 je-input 同口径，同一表单行里的控件能对齐 */
+.je-area--small .je-area__trigger {
+  height: var(--je-touch-h-sm);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.je-area--large .je-area__trigger {
+  height: var(--je-touch-h-lg);
+  padding: 0 20px;
+  font-size: 17px;
 }
 
 /* 小程序原生 button 自带 ::after 描边，这里压掉，避免多出一圈细边 */

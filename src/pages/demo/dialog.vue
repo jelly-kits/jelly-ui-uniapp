@@ -9,15 +9,6 @@ import JeDialogHost from '../../components/je-dialog/je-dialog-host.vue'
 import { showDialog } from '../../components/je-dialog'
 import type { JeDialogDone } from '../../components/je-dialog'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 对话框 */
 const dialogBasic = ref(false)
 
@@ -47,14 +38,7 @@ const openImperativeDialog = async () => {
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">对话框</text>
-      </view>
-    </view>
+    <doc-demo-bar title="对话框" route="dialog" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="对话框" description="JeDialog" inset>

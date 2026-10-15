@@ -573,6 +573,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "点击遮罩是否关闭",
         "type": "boolean",
         "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -672,6 +677,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "数据为空时的文案",
         "type": "string",
         "default": "'无匹配结果'"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -1113,6 +1123,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否可一键清空",
         "type": "boolean",
         "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -1286,6 +1301,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否禁用",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -1559,8 +1579,7 @@ export const componentApi: Record<string, ComponentApi> = {
       {
         "name": "size",
         "description": "尺寸",
-        "type": "JeColorPickerSize",
-        "default": "'default'"
+        "type": "JeColorPickerSize"
       }
     ],
     "events": [
@@ -1817,6 +1836,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "一周起始日，0 = 周日，1 = 周一",
         "type": "number",
         "default": "1"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -3228,8 +3252,7 @@ export const componentApi: Record<string, ComponentApi> = {
       {
         "name": "size",
         "description": "尺寸，默认 default",
-        "type": "JeInputSize",
-        "default": "'default'"
+        "type": "JeInputSize"
       },
       {
         "name": "prefixIcon",
@@ -4409,6 +4432,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "未聚焦时也显示光标（适合配合自定义数字键盘）。\n它只放宽显示条件，不改变光标落点——光标始终停在下一个待填的格子上。",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -4541,6 +4569,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "点击遮罩关闭",
         "type": "boolean",
         "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -5159,6 +5192,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否禁用",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -5469,6 +5507,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "有内容时显示清除按钮",
         "type": "boolean",
         "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -5531,6 +5574,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "撑满父级宽度",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -5568,6 +5616,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "禁用",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -5952,6 +6005,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否显示提示",
         "type": "boolean",
         "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -6209,15 +6267,18 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "inputWidth",
-        "description": "输入框宽度",
-        "type": "number | string",
-        "default": "48"
+        "description": "输入框宽度；不传时由 size 档位决定",
+        "type": "number | string"
       },
       {
         "name": "buttonSize",
-        "description": "加减按钮的尺寸",
-        "type": "number",
-        "default": "32"
+        "description": "加减按钮的尺寸；不传时由 size 档位决定",
+        "type": "number"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       },
       {
         "name": "beforeChange",
@@ -6559,6 +6620,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否处于加载中",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -7185,6 +7251,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否禁用",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -7250,6 +7321,11 @@ export const componentApi: Record<string, ComponentApi> = {
         "name": "maxTime",
         "description": "可选上限（含）",
         "type": "string"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [
@@ -7617,6 +7693,17 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "是否手风琴模式（同时只展开一个）",
         "type": "boolean",
         "default": "false"
+      },
+      {
+        "name": "defaultExpandAll",
+        "description": "面板里的树初始是否展开所有节点",
+        "type": "boolean",
+        "default": "true"
+      },
+      {
+        "name": "size",
+        "description": "尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default",
+        "type": "JeConfigSize"
       }
     ],
     "events": [

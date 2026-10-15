@@ -6,15 +6,6 @@
  */
 import type { JeTableColumn, JeTableRow } from '../../components/je-table'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 表格：一份数据同时覆盖卡片形态、表格形态与树形展开（子行挂在 children 上） */
 const tableData: JeTableRow[] = [
   {
@@ -45,14 +36,7 @@ const tableColumns: JeTableColumn[] = [
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">表格 · 表格形态</text>
-      </view>
-    </view>
+    <doc-demo-bar title="表格 · 表格形态" route="table-grid" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="表格 · 表格形态" description="JeTable（layout=table，列宽放不下时横向滚动）" inset>

@@ -4,6 +4,7 @@ import { useSheetDrag } from '../../core/useSheetDrag'
 import { useUid } from '../../core/useUid'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeColorPickerSize } from './types'
 
 defineOptions({ name: 'JeColorPicker' })
@@ -22,7 +23,7 @@ const props = withDefaults(
     disabled: false,
     showAlpha: false,
     predefine: undefined,
-    size: 'default',
+    size: undefined,
   },
 )
 
@@ -31,6 +32,14 @@ const emit = defineEmits<{
   change: [color: string]
   'active-change': [color: string]
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置（JeConfigProvider）；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-color-picker--${size.value}`))
+
+/** 右侧箭头随档位缩放，与其余表单控件同一套口径 */
+const CONTROL_ICON: Record<JeConfigSize, number> = { small: 14, default: 16, large: 18 }
+const iconSize = computed(() => CONTROL_ICON[size.value])
 
 /* ---------- 颜色换算（纯函数，零依赖，与主库一致） ---------- */
 
@@ -422,7 +431,7 @@ onBeforeUnmount(() => {
   <view
     ref="rootRef"
     class="je-color-picker"
-    :class="[`je-color-picker--${size}`, { 'is-disabled': disabled, 'is-open': isOpen }]"
+    :class="[sizeClass, { 'is-disabled': disabled, 'is-open': isOpen }]"
     @keydown="onKeydown"
   >
     <view
@@ -438,7 +447,7 @@ onBeforeUnmount(() => {
     >
       <view class="je-color-picker__swatch" :style="{ background: currentColor }" aria-hidden="true" />
       <text class="je-color-picker__value">{{ currentColor }}</text>
-      <JeIcon name="chevron-down" :size="14" class="je-color-picker__arrow" />
+      <JeIcon name="chevron-down" :size="iconSize" class="je-color-picker__arrow" />
     </view>
 
     <!-- 遮罩层同时吞掉穿透的滚动：小程序端没有 body，锁屏只能靠这里 -->
@@ -553,8 +562,11 @@ onBeforeUnmount(() => {
 .je-color-picker__trigger {
   display: inline-flex;
   align-items: center;
+  box-sizing: border-box;
   gap: 8px;
-  padding: 8px 12px;
+  /* 定高三档，与 je-input / je-select 同一套 token；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 12px;
   font-size: 14px;
   color: var(--je-text);
   background: var(--je-surface);
@@ -576,12 +588,14 @@ onBeforeUnmount(() => {
 }
 
 .je-color-picker--small .je-color-picker__trigger {
-  padding: 5px 10px;
+  height: var(--je-touch-h-sm);
+  padding: 0 10px;
   font-size: 13px;
 }
 
 .je-color-picker--large .je-color-picker__trigger {
-  padding: 11px 14px;
+  height: var(--je-touch-h-lg);
+  padding: 0 14px;
   font-size: 15px;
 }
 
@@ -875,9 +889,7 @@ onBeforeUnmount(() => {
     min-height: 32px;
   }
 
-  .je-color-picker__trigger {
-    min-height: 44px;
-  }
+  /* 触发器的高度不再挂 @media：uni 版只有触屏一个形态，上面三档就是触屏档 */
 
   /* 触屏没有 hover，预设色的放缩反馈交给按下态 */
   .je-color-picker__pre:hover {

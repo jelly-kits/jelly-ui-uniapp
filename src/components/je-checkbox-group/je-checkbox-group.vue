@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 import type { JeCheckboxOption } from './types'
 
 defineOptions({ name: 'JeCheckboxGroup' })
@@ -10,11 +11,17 @@ const props = withDefaults(
     modelValue?: (string | number)[]
     options: JeCheckboxOption[]
     disabled?: boolean
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
   }>(),
-  { modelValue: () => [], options: () => [], disabled: false },
+  { modelValue: () => [], options: () => [], disabled: false, size: undefined },
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: (string | number)[]] }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
+const size = useJeConfigSize(() => props.size)
+const sizeClass = computed(() => (size.value === 'default' ? '' : `je-checkbox-group--${size.value}`))
 
 const isChecked = (value: string | number) => props.modelValue.includes(value)
 
@@ -51,7 +58,7 @@ const toggle = (option: JeCheckboxOption) => {
 </script>
 
 <template>
-  <view class="je-checkbox-group" :class="{ 'is-disabled': disabled }">
+  <view class="je-checkbox-group" :class="[sizeClass, { 'is-disabled': disabled }]">
     <view
       v-for="option in options"
       :key="option.value"
@@ -84,9 +91,12 @@ const toggle = (option: JeCheckboxOption) => {
 
 <style scoped>
 .je-checkbox-group {
+  /* 一行排多个，放不下自动换行，不浪费右侧空白。
+     间距与内边距都取得比较紧：窄屏（375px）下选项所在容器常常只有 190px 上下，
+     之前 12px 间距 + 14px 水平内边距会让一项占到 92px，两个刚好放不下、被挤成一行一个 */
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .je-checkbox {
@@ -94,13 +104,29 @@ const toggle = (option: JeCheckboxOption) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  box-sizing: border-box;
+  /* 定高 44px，与 je-input / je-select 同一档；宽度由左右内边距撑 */
+  height: var(--je-touch-h);
+  padding: 0 10px;
   background: var(--je-surface);
   border: 1.5px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   user-select: none;
   transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/* 尺寸三档：只覆盖高度 / 左右内边距 / 字号，配色、圆角、交互状态都沿用基础样式 */
+.je-checkbox-group--small .je-checkbox {
+  height: var(--je-touch-h-sm);
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+.je-checkbox-group--large .je-checkbox {
+  height: var(--je-touch-h-lg);
+  padding: 0 14px;
+  font-size: 16px;
 }
 
 .je-checkbox:hover {

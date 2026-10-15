@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
 
 defineOptions({ name: 'JeStepper' })
 
@@ -21,10 +22,12 @@ const props = withDefaults(
     disabled?: boolean
     /** 禁用中间的输入框，只能点按钮 */
     disableInput?: boolean
-    /** 输入框宽度 */
+    /** 输入框宽度；不传时由 size 档位决定 */
     inputWidth?: number | string
-    /** 加减按钮的尺寸 */
+    /** 加减按钮的尺寸；不传时由 size 档位决定 */
     buttonSize?: number
+    /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
+    size?: JeConfigSize
     /**
      * 变更前的拦截钩子，返回 false（或 resolve false）则不更新。
      * 支持异步，便于先弹确认框再决定是否改动。
@@ -40,8 +43,10 @@ const props = withDefaults(
     decimalLength: undefined,
     disabled: false,
     disableInput: false,
-    inputWidth: 48,
-    buttonSize: 32,
+    // 两个尺寸 prop 默认留空：由 size 档位下发（default 档结果仍是按钮 32 / 输入框 48）
+    inputWidth: undefined,
+    buttonSize: undefined,
+    size: undefined,
     beforeChange: undefined,
   },
 )
@@ -53,6 +58,9 @@ const emit = defineEmits<{
   /** 已到边界再继续加减、或手动输入超限时触发 */
   overlimit: [type: 'plus' | 'minus']
 }>()
+
+/** 尺寸：组件自身优先，再退回全局配置；default 档不产生额外变化（预设值即原默认值） */
+const size = useJeConfigSize(() => props.size)
 
 const decimalsOf = (value: number) => {
   const text = String(value)
@@ -85,11 +93,29 @@ watch(displayValue, (value) => {
   inputValue.value = value
 }, { immediate: true })
 
-const rootStyle = computed(() => ({
-  '--je-stepper-btn': `${props.buttonSize}px`,
-  '--je-stepper-input-w':
-    typeof props.inputWidth === 'number' ? `${props.inputWidth}px` : props.inputWidth,
-}))
+/**
+ * 尺寸档位下发的默认值；“细粒度 prop 优先”：显式传了 buttonSize / inputWidth 就覆盖档位值。
+ * default 档与改动前的默认值一致（按钮 32 / 输入框 48），行为不变。
+ */
+const SIZE_PRESET: Record<JeConfigSize, { buttonSize: number; inputWidth: number }> = {
+  small: { buttonSize: 28, inputWidth: 44 },
+  default: { buttonSize: 32, inputWidth: 48 },
+  large: { buttonSize: 40, inputWidth: 56 },
+}
+
+/** 加减号图标随档位缩放，default 档保持原有 14px */
+const STEP_ICON: Record<JeConfigSize, number> = { small: 12, default: 14, large: 16 }
+const stepIconSize = computed(() => STEP_ICON[size.value])
+
+const rootStyle = computed(() => {
+  const preset = SIZE_PRESET[size.value]
+  const buttonSize = props.buttonSize ?? preset.buttonSize
+  const inputWidth = props.inputWidth ?? preset.inputWidth
+  return {
+    '--je-stepper-btn': `${buttonSize}px`,
+    '--je-stepper-input-w': typeof inputWidth === 'number' ? `${inputWidth}px` : inputWidth,
+  }
+})
 
 /** 还原输入框显示（拦截 / 无效输入时用） */
 const restore = () => {
@@ -202,7 +228,7 @@ onBeforeUnmount(stopRepeat)
       @mouseleave="stopRepeat"
       @contextmenu.prevent
     >
-      <JeIcon name="minus" :size="14" />
+      <JeIcon name="minus" :size="stepIconSize" />
     </button>
     <!-- #endif -->
 
@@ -215,7 +241,7 @@ onBeforeUnmount(stopRepeat)
       @touchend="stopRepeat"
       @touchcancel="stopRepeat"
     >
-      <JeIcon name="minus" :size="14" />
+      <JeIcon name="minus" :size="stepIconSize" />
     </button>
     <!-- #endif -->
 
@@ -259,7 +285,7 @@ onBeforeUnmount(stopRepeat)
       @mouseleave="stopRepeat"
       @contextmenu.prevent
     >
-      <JeIcon name="plus" :size="14" />
+      <JeIcon name="plus" :size="stepIconSize" />
     </button>
     <!-- #endif -->
 
@@ -272,7 +298,7 @@ onBeforeUnmount(stopRepeat)
       @touchend="stopRepeat"
       @touchcancel="stopRepeat"
     >
-      <JeIcon name="plus" :size="14" />
+      <JeIcon name="plus" :size="stepIconSize" />
     </button>
     <!-- #endif -->
   </view>

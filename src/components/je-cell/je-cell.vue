@@ -125,10 +125,13 @@ const onKeydown = (event: KeyboardEvent) => {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 14px 16px;
+  /* 单行正好 10 + 24 + 10 = 44px，与按钮 / 输入框同一档。
+     这里不能用定高的 height：单元格可能是「标题 + 说明」两行，
+     高度得跟着行数走，所以用行高 + 上下内边距凑出 44px */
+  padding: 10px 16px;
   font-family: inherit;
   font-size: 15px;
-  line-height: 1.45;
+  line-height: 24px;
   color: var(--je-text);
   background: transparent;
   transition: background var(--je-duration) ease;
@@ -137,8 +140,9 @@ const onKeydown = (event: KeyboardEvent) => {
 }
 
 .je-cell--large {
-  padding: 18px 16px;
+  padding: 12px 16px;
   font-size: 16px;
+  line-height: 26px;
 }
 
 .je-cell.is-center {
@@ -180,8 +184,8 @@ const onKeydown = (event: KeyboardEvent) => {
   align-items: center;
   justify-content: center;
   min-width: 22px;
-  /* 与 15px 字号的行高对齐，视觉上跟标题同一条基线 */
-  min-height: 22px;
+  /* 与单元格的行高对齐，视觉上跟标题同一条基线 */
+  min-height: 24px;
   color: var(--je-text-muted);
 }
 
@@ -229,10 +233,5 @@ const onKeydown = (event: KeyboardEvent) => {
   color: var(--je-text-faint);
 }
 
-@media (max-width: 768px) {
-  /* 触屏上把整行热区兜到 44px 以上 */
-  .je-cell {
-    min-height: 48px;
-  }
-}
+/* 窄屏不用再兜热区：单行本身就是 44px，多行的只会更高 */
 </style>

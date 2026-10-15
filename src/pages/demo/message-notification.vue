@@ -7,15 +7,6 @@
 import { showMessage } from '../../components/je-message'
 import { showNotify } from '../../components/je-notification'
 
-/** 返回目录页；直接从链接打开详情页时没有返回栈，退化成重启到首页 */
-const goBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.reLaunch({ url: '/pages/index/index' })
-    },
-  })
-}
-
 /** 命令式通知：右上角弹一条 */
 const openNotification = () => {
   showNotify({
@@ -29,14 +20,7 @@ const openNotification = () => {
 
 <template>
   <view class="doc" :class="jeThemeClass" :style="jeThemeVars">
-    <view class="doc__bar">
-      <view class="doc__bar-inner">
-        <view class="doc__back" aria-label="返回组件列表" @tap="goBack">
-          <je-icon name="chevron-left" :size="22" />
-        </view>
-        <text class="doc__title">轻提示 / 通知</text>
-      </view>
-    </view>
+    <doc-demo-bar title="轻提示 / 通知" route="message-notification" />
 
     <scroll-view scroll-y class="doc__body">
       <je-cell-group title="轻提示 / 通知" description="JeMessage + JeNotification（命令式，页面已挂宿主）" inset>
