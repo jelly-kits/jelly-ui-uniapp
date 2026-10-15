@@ -1,6 +1,6 @@
 {
   "name": "@jelly-kits/jelly-ui-uniapp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Jelly UI 的 uni-app 版：跨端组件库，微信小程序与 H5 同源，支持 easycom 按需引入",
   "license": "MIT",
   "homepage": "https://jelly-kits.github.io/jelly-ui-uniapp/",
