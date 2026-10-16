@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeButton from '../je-button/je-button.vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeDialogProps, JeDialogDone } from './types'
 
 defineOptions({ name: 'JeDialog' })
@@ -49,6 +50,8 @@ const emit = defineEmits<{
   /** 内置页脚的取消按钮走完流程后触发（被 before-close 拦下时不触发） */
   cancel: []
 }>()
+
+const { t } = useJeLocale()
 
 /** 打开动画时长，与样式里的 .42s 对齐；打开后要等它跑完才算 opened */
 const OPEN_ANIMATION_MS = 420
@@ -197,10 +200,10 @@ const onTouchMove = (event: TouchEvent) => {
  */
 const hasBuiltinFooter = computed(() => props.confirmButtonText !== undefined)
 
-/** 取消按钮：showCancelButton 或 cancelButtonText 满足其一即显示；没给文案时用默认「取消」 */
+/** 取消按钮：showCancelButton 或 cancelButtonText 满足其一即显示；没给文案时回退语言包的通用取消 */
 const showCancel = computed(() => props.showCancelButton || props.cancelButtonText !== undefined)
 
-const cancelText = computed(() => props.cancelButtonText ?? '取消')
+const cancelText = computed(() => props.cancelButtonText ?? t('cancel'))
 
 /**
  * 确认按钮的加载态。只有走 beforeClose 时才点亮：
@@ -385,7 +388,7 @@ defineExpose({
           v-if="showClose"
           type="button"
           class="je-dialog__close"
-          aria-label="关闭"
+          :aria-label="t('close')"
           @tap="handleClose"
           @touchstart.stop
         >

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeImageFit } from './types'
 
 defineOptions({ name: 'JeImage' })
@@ -40,6 +41,8 @@ const emit = defineEmits<{
   error: []
   close: []
 }>()
+
+const { t } = useJeLocale()
 
 const toCssSize = (value?: string | number) => (typeof value === 'number' ? `${value}px` : value)
 
@@ -299,7 +302,7 @@ const viewerImgStyle = computed(() => ({
         <button type="button" class="je-image__viewer-tool" aria-label="旋转" @tap="rotateBy">
           <JeIcon name="rotate-right" :size="20" />
         </button>
-        <button type="button" class="je-image__viewer-tool" aria-label="关闭" @tap="closeViewer">
+        <button type="button" class="je-image__viewer-tool" :aria-label="t('close')" @tap="closeViewer">
           <JeIcon name="close" :size="20" />
         </button>
       </view>

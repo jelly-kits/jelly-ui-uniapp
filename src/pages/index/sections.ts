@@ -627,6 +627,12 @@ export const sectionGroups: DemoSectionGroup[] = [
         desc: '内置 zh-CN / en-US 文案，支持注册自定义语言、扩展可翻译字段。',
       },
       {
+        title: '块编辑器',
+        route: 'block-editor',
+        icon: 'text',
+        desc: '把内容拆成文本 / 图片 / 视频 / 超链接块，拖动排序，数据是一份纯 JSON。',
+      },
+      {
         title: '主题',
         route: 'theme',
         icon: 'sun',

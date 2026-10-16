@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeActionSheetAction } from './types'
 
 defineOptions({ name: 'JeActionSheet' })
@@ -17,7 +18,7 @@ const props = withDefaults(
     title?: string
     /** 标题下方的说明文字 */
     description?: string
-    /** 取消按钮文字，传空字符串则不显示取消按钮 */
+    /** 取消按钮文字，未传时用语言包的 cancel 文案；传空字符串则不显示取消按钮 */
     cancelText?: string
     /** 点击操作项后自动关闭 */
     closeOnClickAction?: boolean
@@ -29,7 +30,7 @@ const props = withDefaults(
   {
     modelValue: false,
     actions: () => [],
-    cancelText: '取消',
+    cancelText: undefined,
     closeOnClickAction: true,
     closeOnClickModal: true,
     closeOnEscape: true,
@@ -47,6 +48,11 @@ const emit = defineEmits<{
   /** 开始收起 */
   close: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 取消按钮文案：外部优先，未传时回退语言包的通用取消 */
+const cancelText = computed(() => props.cancelText ?? t('cancel'))
 
 const zIndex = ref(nextZIndex())
 

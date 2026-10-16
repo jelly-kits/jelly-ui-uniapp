@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import { useUid } from '../../core/useUid'
 import JeButton from '../je-button/je-button.vue'
+import { useJeLocale } from '../je-locale'
 import type { JePopconfirmType } from './types'
 import type { JePlacementValue } from '../../core/placement'
 
@@ -13,7 +14,9 @@ const props = withDefaults(
     modelValue?: boolean
     title?: string
     content?: string
+    /** 确认按钮文字，未传时用语言包的 confirm 文案 */
     confirmText?: string
+    /** 取消按钮文字，未传时用语言包的 cancel 文案 */
     cancelText?: string
     placement?: JePlacementValue
     /** 确认按钮语义色 */
@@ -25,8 +28,8 @@ const props = withDefaults(
     modelValue: false,
     title: '',
     content: '',
-    confirmText: '确定',
-    cancelText: '取消',
+    confirmText: undefined,
+    cancelText: undefined,
     placement: 'top',
     type: 'primary',
     width: 220,
@@ -38,6 +41,13 @@ const emit = defineEmits<{
   confirm: []
   cancel: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 确认按钮文案：外部优先，未传时回退语言包的通用确定 */
+const confirmText = computed(() => props.confirmText ?? t('confirm'))
+/** 取消按钮文案：外部优先，未传时回退语言包的通用取消 */
+const cancelText = computed(() => props.cancelText ?? t('cancel'))
 
 const uid = useUid('je-popconfirm')
 const rootRef = ref<HTMLElement | null>(null)

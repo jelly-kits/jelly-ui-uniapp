@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeIconName } from '../je-icon/icons'
 
 defineOptions({ name: 'JePopup' })
@@ -65,6 +66,8 @@ const emit = defineEmits<{
   /** 点击遮罩 */
   clickOverlay: []
 }>()
+
+const { t } = useJeLocale()
 
 const innerZIndex = ref(nextZIndex())
 
@@ -159,7 +162,7 @@ const onOverlayClick = () => {
         type="button"
         class="je-popup__close"
         :class="`je-popup__close--${closeIconPosition}`"
-        aria-label="关闭"
+        :aria-label="t('close')"
         @tap="close"
       >
         <JeIcon :name="closeIcon" :size="16" />

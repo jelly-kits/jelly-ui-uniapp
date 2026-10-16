@@ -23,6 +23,10 @@ export interface JeLocaleMessages {
   cancel: string
   /** 通用加载中 */
   loading: string
+  /** 通用关闭（浮层、卡片、标签等的关闭按钮） */
+  close: string
+  /** 通用空态文案 */
+  empty: string
   /** 手写签名 */
   signature: {
     clear: string
@@ -57,6 +61,85 @@ export interface JeLocaleMessages {
     /** 新增节点的默认名称 */
     newNode: string
   }
+  /** 块编辑器（JeBlockEditor）与只读渲染（JeBlockView） */
+  block: {
+    /** 文本块 */
+    text: string
+    /** 图片块 */
+    image: string
+    /** 视频块 */
+    video: string
+    /** 超链接块 */
+    link: string
+    /** 文本块的占位文案 */
+    placeholder: string
+    /** 一个块都没有时的提示 */
+    empty: string
+    /** 拖动排序把手 */
+    drag: string
+    /** 上移 */
+    up: string
+    /** 下移 */
+    down: string
+    /** 复制块 */
+    copy: string
+    /** 删除块 */
+    remove: string
+    /** 打开这个块的编辑窗口 */
+    edit: string
+    /** 编辑窗口的标题模板，支持 {type} */
+    editTitle: string
+    /** 地址字段的名称 */
+    url: string
+    /** 图片地址输入框的占位文案 */
+    imageUrl: string
+    /** 视频地址输入框的占位文案 */
+    videoUrl: string
+    /** 链接地址输入框的占位文案 */
+    linkUrl: string
+    /** 图片替代文字字段 */
+    alt: string
+    /** 替代文字输入框的占位文案 */
+    altPlaceholder: string
+    /** 视频封面字段 */
+    poster: string
+    /** 封面地址输入框的占位文案 */
+    posterPlaceholder: string
+    /** 链接标题字段 */
+    linkTitle: string
+    /** 链接标题输入框的占位文案 */
+    linkTitlePlaceholder: string
+    /** 文本块编辑窗口里的内容字段 */
+    content: string
+    /** 图片 / 视频的宽度字段 */
+    width: string
+    /** 图片 / 视频的高度字段 */
+    height: string
+    /** 高度留空时的提示（按素材比例自适应） */
+    heightAuto: string
+    /** 自定义尺寸输入框的占位文案 */
+    custom: string
+    /** 缩放方式字段 */
+    fit: string
+    /** 完整显示 */
+    fitContain: string
+    /** 裁剪填满 */
+    fitCover: string
+    /** 拉伸铺满 */
+    fitFill: string
+    /** 选择图片，支持一次选多张 */
+    pickImage: string
+    /** 选择视频 */
+    pickVideo: string
+    /** 播放（视频还停在封面上时的播放键） */
+    play: string
+    /** 上传按钮 */
+    upload: string
+    /** 上传中 */
+    uploading: string
+    /** 上传失败提示 */
+    uploadFailed: string
+  }
 }
 
 /** 简体中文（缺省语言包） */
@@ -65,6 +148,8 @@ export const jeZhCN: JeLocaleMessages = {
   confirm: '确定',
   cancel: '取消',
   loading: '加载中...',
+  close: '关闭',
+  empty: '暂无数据',
   signature: {
     clear: '清空',
     undo: '撤销',
@@ -87,6 +172,46 @@ export const jeZhCN: JeLocaleMessages = {
     removeConfirmLeaf: '删除该节点？',
     newNode: '新节点',
   },
+  block: {
+    text: '文本',
+    image: '图片',
+    video: '视频',
+    link: '超链接',
+    placeholder: '请输入文本',
+    empty: '还没有任何块，点上面的按钮添加',
+    drag: '拖动排序',
+    up: '上移',
+    down: '下移',
+    copy: '复制',
+    remove: '删除',
+    edit: '编辑',
+    editTitle: '编辑{type}块',
+    url: '地址',
+    imageUrl: '请输入图片地址',
+    videoUrl: '请输入视频地址',
+    linkUrl: '请输入链接地址',
+    alt: '替代文字',
+    altPlaceholder: '图片加载不出来时显示的文字（可选）',
+    poster: '封面图',
+    posterPlaceholder: '视频封面地址（可选）',
+    linkTitle: '标题',
+    linkTitlePlaceholder: '链接标题（可选，留空显示地址）',
+    content: '内容',
+    width: '宽度',
+    height: '高度',
+    heightAuto: '自适应',
+    custom: '自定义',
+    fit: '缩放',
+    fitContain: '完整显示',
+    fitCover: '裁剪填满',
+    fitFill: '拉伸铺满',
+    pickImage: '选择图片',
+    pickVideo: '选择视频',
+    play: '播放',
+    upload: '上传',
+    uploading: '上传中…',
+    uploadFailed: '上传失败',
+  },
 }
 
 /** 英文 */
@@ -95,6 +220,8 @@ export const jeEnUS: JeLocaleMessages = {
   confirm: 'Confirm',
   cancel: 'Cancel',
   loading: 'Loading...',
+  close: 'Close',
+  empty: 'No data',
   signature: {
     clear: 'Clear',
     undo: 'Undo',
@@ -116,6 +243,46 @@ export const jeEnUS: JeLocaleMessages = {
     removeConfirm: 'Delete this node and its {count} descendants?',
     removeConfirmLeaf: 'Delete this node?',
     newNode: 'New node',
+  },
+  block: {
+    text: 'Text',
+    image: 'Image',
+    video: 'Video',
+    link: 'Link',
+    placeholder: 'Enter text',
+    empty: 'No blocks yet — add one with the buttons above',
+    drag: 'Drag to reorder',
+    up: 'Move up',
+    down: 'Move down',
+    copy: 'Duplicate',
+    remove: 'Delete',
+    edit: 'Edit',
+    editTitle: 'Edit {type} block',
+    url: 'URL',
+    imageUrl: 'Enter an image URL',
+    videoUrl: 'Enter a video URL',
+    linkUrl: 'Enter a link URL',
+    alt: 'Alt text',
+    altPlaceholder: 'Shown when the image fails to load (optional)',
+    poster: 'Poster',
+    posterPlaceholder: 'Video poster URL (optional)',
+    linkTitle: 'Title',
+    linkTitlePlaceholder: 'Link title (optional; falls back to the URL)',
+    content: 'Content',
+    width: 'Width',
+    height: 'Height',
+    heightAuto: 'Auto',
+    custom: 'Custom',
+    fit: 'Fit',
+    fitContain: 'Contain',
+    fitCover: 'Cover',
+    fitFill: 'Fill',
+    pickImage: 'Choose images',
+    pickVideo: 'Choose video',
+    play: 'Play',
+    upload: 'Upload',
+    uploading: 'Uploading…',
+    uploadFailed: 'Upload failed',
   },
 }
 
@@ -202,6 +369,7 @@ export function resolveLocale(
     shareSheet: { ...base.shareSheet, ...input.shareSheet },
     imagePreview: { ...base.imagePreview, ...input.imagePreview },
     orgChart: { ...base.orgChart, ...input.orgChart },
+    block: { ...base.block, ...input.block },
   }
 }
 
@@ -221,6 +389,8 @@ function fromAdapter(adapter: JeLocaleAdapter, base: JeLocaleMessages): JeLocale
     confirm: get('confirm', base.confirm),
     cancel: get('cancel', base.cancel),
     loading: get('loading', base.loading),
+    close: get('close', base.close),
+    empty: get('empty', base.empty),
     signature: {
       clear: get('signature.clear', base.signature.clear),
       undo: get('signature.undo', base.signature.undo),
@@ -242,6 +412,46 @@ function fromAdapter(adapter: JeLocaleAdapter, base: JeLocaleMessages): JeLocale
       removeConfirm: get('orgChart.removeConfirm', base.orgChart.removeConfirm),
       removeConfirmLeaf: get('orgChart.removeConfirmLeaf', base.orgChart.removeConfirmLeaf),
       newNode: get('orgChart.newNode', base.orgChart.newNode),
+    },
+    block: {
+      text: get('block.text', base.block.text),
+      image: get('block.image', base.block.image),
+      video: get('block.video', base.block.video),
+      link: get('block.link', base.block.link),
+      placeholder: get('block.placeholder', base.block.placeholder),
+      empty: get('block.empty', base.block.empty),
+      drag: get('block.drag', base.block.drag),
+      up: get('block.up', base.block.up),
+      down: get('block.down', base.block.down),
+      copy: get('block.copy', base.block.copy),
+      remove: get('block.remove', base.block.remove),
+      edit: get('block.edit', base.block.edit),
+      editTitle: get('block.editTitle', base.block.editTitle),
+      url: get('block.url', base.block.url),
+      imageUrl: get('block.imageUrl', base.block.imageUrl),
+      videoUrl: get('block.videoUrl', base.block.videoUrl),
+      linkUrl: get('block.linkUrl', base.block.linkUrl),
+      alt: get('block.alt', base.block.alt),
+      altPlaceholder: get('block.altPlaceholder', base.block.altPlaceholder),
+      poster: get('block.poster', base.block.poster),
+      posterPlaceholder: get('block.posterPlaceholder', base.block.posterPlaceholder),
+      linkTitle: get('block.linkTitle', base.block.linkTitle),
+      linkTitlePlaceholder: get('block.linkTitlePlaceholder', base.block.linkTitlePlaceholder),
+      content: get('block.content', base.block.content),
+      width: get('block.width', base.block.width),
+      height: get('block.height', base.block.height),
+      heightAuto: get('block.heightAuto', base.block.heightAuto),
+      custom: get('block.custom', base.block.custom),
+      fit: get('block.fit', base.block.fit),
+      fitContain: get('block.fitContain', base.block.fitContain),
+      fitCover: get('block.fitCover', base.block.fitCover),
+      fitFill: get('block.fitFill', base.block.fitFill),
+      pickImage: get('block.pickImage', base.block.pickImage),
+      pickVideo: get('block.pickVideo', base.block.pickVideo),
+      play: get('block.play', base.block.play),
+      upload: get('block.upload', base.block.upload),
+      uploading: get('block.uploading', base.block.uploading),
+      uploadFailed: get('block.uploadFailed', base.block.uploadFailed),
     },
   }
 }

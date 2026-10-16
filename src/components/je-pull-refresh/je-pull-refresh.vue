@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
 import { useSpring } from '../../core/useSpring'
 import { jePresets } from '../../core/presets'
+import { useJeLocale } from '../je-locale'
 
 defineOptions({ name: 'JePullRefresh' })
 
@@ -20,7 +21,7 @@ const props = withDefaults(
     pullingText?: string
     /** 达到阈值、可松手时的提示 */
     loosingText?: string
-    /** 加载中提示 */
+    /** 加载中提示，未传时用语言包的 loading 文案 */
     loadingText?: string
     /** 刷新成功提示 */
     successText?: string
@@ -32,7 +33,7 @@ const props = withDefaults(
     successDuration: 500,
     pullingText: '下拉即可刷新',
     loosingText: '释放立即刷新',
-    loadingText: '加载中...',
+    loadingText: undefined,
     successText: '刷新成功',
   },
 )
@@ -42,6 +43,11 @@ const emit = defineEmits<{
   /** 下拉距离达到阈值并松手 */
   refresh: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 加载中提示：外部优先，未传时回退语言包的通用加载中 */
+const loadingText = computed(() => props.loadingText ?? t('loading'))
 
 type PullStatus = 'normal' | 'pulling' | 'loosing' | 'loading' | 'success'
 
@@ -218,7 +224,7 @@ const headText = computed(() => {
     case 'loosing':
       return props.loosingText
     case 'loading':
-      return props.loadingText
+      return loadingText.value
     case 'success':
       return props.successText
     default:

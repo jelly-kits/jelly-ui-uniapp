@@ -4,6 +4,7 @@ import { useSheetDrag } from '../../core/useSheetDrag'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
 import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
+import { useJeLocale } from '../je-locale'
 import type { JeAreaOption } from './types'
 
 defineOptions({ name: 'JeArea' })
@@ -23,7 +24,9 @@ const props = withDefaults(
     /** 未选择的标签页上的占位文字 */
     columnsPlaceholder?: string
     disabled?: boolean
+    /** 确认按钮文字，未传时用语言包的 confirm 文案 */
     confirmText?: string
+    /** 取消按钮文字，未传时用语言包的 cancel 文案 */
     cancelText?: string
     showToolbar?: boolean
     visibleItemCount?: number
@@ -40,8 +43,8 @@ const props = withDefaults(
     placeholder: '请选择所在地区',
     columnsPlaceholder: '请选择',
     disabled: false,
-    confirmText: '确认',
-    cancelText: '取消',
+    confirmText: undefined,
+    cancelText: undefined,
     showToolbar: true,
     visibleItemCount: 5,
     itemHeight: 44,
@@ -59,6 +62,13 @@ const emit = defineEmits<{
   /** 点击取消或遮罩 */
   cancel: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 确认按钮文案：外部优先，未传时回退语言包的通用确定 */
+const confirmText = computed(() => props.confirmText ?? t('confirm'))
+/** 取消按钮文案：外部优先，未传时回退语言包的通用取消 */
+const cancelText = computed(() => props.cancelText ?? t('cancel'))
 
 /** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
 const size = useJeConfigSize(() => props.size)

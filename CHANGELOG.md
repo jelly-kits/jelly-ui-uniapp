@@ -7,6 +7,52 @@
 - 分类沿用 Keep a Changelog 的口径：**新增 / 优化 / 修复 / 文档 / 工程**。
   「工程」是不影响使用方的内部改动，只想看组件用法可以跳过。
 
+## 未发布
+
+### 新增
+
+- **`je-block-editor` + `je-block-view`**：块编辑器与只读渲染组件，与主库 `JeBlockEditor` /
+  `JeBlockView` 同口径 —— 一段文本、一张图片、一个视频、一条超链接各占一块，每块占满一行、
+  可拖动排序，数据是一份**不含 HTML 的纯 JSON**（`{ version, blocks }`），其他端按 `type`
+  分支渲染即可，`je-block-view` 就是展示侧的参照实现。
+  - **交互**：块平时只是一份预览，**点一下才选中**（高亮边框），选中后块头部才出现图标
+    —— 拖动把手 + 编辑 / 上移 / 下移 / 复制 / 删除；点「编辑」打开**居中弹窗**改这个块，
+    改完点确定才写回数据；从顶部操作栏添加新块时会自动选中并直接打开它的编辑窗口。
+  - **上传**：传 `upload` 回调后图片 / 视频都能上传（不传则只能填地址）；
+    **图片支持一次选多张** —— 第一张落在当前块，其余各生成一个图片块插在它后面。
+  - **视频是点播的**：视频块默认只渲染封面（`poster`）+ 播放键，播放器根本不挂载，
+    点了播放键才创建并自动播放，页面加载时一字节视频数据都不拉；
+    没填封面图时是一块深色占位 + 播放键。
+  - **尺寸**：可调宽度（25% / 50% / 75% / 100% 档位，或自定义数值 + `%` / `px` 单位）、
+    高度（留空即自适应）与缩放方式（`contain` / `cover` / `fill`，端上落到 `<image>` 的
+    `mode` 与 `<video>` 的 `object-fit`；`contain` 是默认值，不写进 JSON）。
+  - **可配置**：`blockTypes` 限定可添加的块类型；`toolbar` 与 `blockActions` 都是
+    「白名单 + 顺序 + 自定义按钮」，回调里能拿到块与下标，也可以调 `openEditor` 复用内置编辑窗口。
+  - 其余属性：`placeholder`、`disabled`；事件：`change` / `upload-error` / `link-click`；
+    可调用函数：`getDocument()` / `addBlock()` / `openEditor()` / `clear()`。
+- **`je-icon` 新增 `video`、`text` 两个图标**（供块编辑器使用）。
+
+### 优化
+
+- **库自带的界面文案改走语言包**：`确定` / `取消` / `加载中` 这类固定文案以前是写死的，
+  切到英文后依然是中文；现在统一从语言包取值，语言包也补了顶层 `close`（关闭）与 `empty`（暂无数据）。
+  - 按钮：`je-dialog` / `je-action-sheet` / `je-area` / `je-picker` / `je-popconfirm` 的确定与取消、
+    `je-search` 的取消、`je-share-sheet` 的「分享到」与取消；
+    命令式 `showDialog` 的默认按钮文案跟随应用级语言配置。
+  - 提示：`je-auto-complete` / `je-infinite-scroll` / `je-pull-refresh` 的加载中提示；
+    空态：`je-empty` / `je-table` / `je-tree`。
+  - 无障碍标签：`je-dialog` / `je-drawer` / `je-popup` / `je-image` / `je-alert` / `je-message` /
+    `je-notification` / `je-notice-bar` / `je-floating-panel` / `je-tag` 的关闭按钮 `aria-label`。
+  - 组件上同名的 prop（`cancelText` / `confirmText` / `loadingText` / `emptyText` 等）仍然优先，
+    不传时才回退语言包，行为与之前一致。
+
+### 文档
+
+- `je-locale` 语言包新增顶层 `close`（关闭）与 `empty`（暂无数据）两条通用文案。
+- **目录页新增「块编辑器」入口与演示页**：基础用法、多图上传与尺寸缩放、只读渲染、
+  自定义按钮与按钮配置、限制块类型与禁用。
+- `je-locale` 语言包新增 `block` 分组（块编辑器与只读渲染的文案，中英各一套）。
+
 ## 0.2.0
 
 ### 新增

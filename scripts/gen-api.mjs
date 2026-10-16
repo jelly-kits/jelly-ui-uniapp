@@ -39,6 +39,7 @@ const ROUTE_OVERRIDES = {
   'table-grid': ['je-table'],
   'alert-result': ['je-alert', 'je-result'],
   'message-notification': ['je-message', 'je-notification'],
+  'block-editor': ['je-block-editor', 'je-block-view'],
   // 「主题」页讲的是主题系统本身，没有对应的组件 API
   theme: [],
 }

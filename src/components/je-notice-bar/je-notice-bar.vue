@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeIconName } from '../je-icon/icons'
 
 defineOptions({ name: 'JeNoticeBar' })
@@ -45,6 +46,8 @@ const emit = defineEmits<{
   /** mode 含 closeable 时点击关闭按钮 */
   close: []
 }>()
+
+const { t } = useJeLocale()
 
 /** 两个副本之间的间距，滚动一个周期后正好首尾相接 */
 const GAP = 48
@@ -159,7 +162,7 @@ const onClick = (event: MouseEvent) => {
       v-if="isCloseable"
       type="button"
       class="je-notice-bar__close"
-      aria-label="关闭"
+      :aria-label="t('close')"
       @tap.stop="emit('close')"
     >
       <JeIcon name="close" :size="14" />

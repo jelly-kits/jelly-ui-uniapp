@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import JeEmpty from '../je-empty/je-empty.vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeTableColumn, JeTableProps, JeTableRow } from './types'
 
 /**
@@ -26,7 +27,7 @@ const props = withDefaults(defineProps<JeTableProps>(), {
   border: false,
   stripe: false,
   showHeader: true,
-  emptyText: '暂无数据',
+  emptyText: undefined,
   rowKey: 'id',
   highlightCurrentRow: false,
   currentRowKey: undefined,
@@ -52,6 +53,11 @@ const emit = defineEmits<{
   /** 树形子行展开 / 收起时触发（与展开行的 expand-change 是两回事） */
   'tree-expand-change': [row: JeTableRow, expanded: boolean]
 }>()
+
+const { t } = useJeLocale()
+
+/** 空态文案：外部没传时回退语言包的通用空态文案 */
+const emptyText = computed(() => props.emptyText ?? t('empty'))
 
 /**
  * 窄屏判定：小程序端没有 window，恒按窄屏处理；

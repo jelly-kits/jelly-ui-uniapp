@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
 import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
+import { useJeLocale } from '../je-locale'
 
 defineOptions({ name: 'JeSearch' })
 
@@ -20,7 +21,7 @@ const props = withDefaults(
     maxlength?: number
     /** 右侧显示「取消」按钮（移动端常见） */
     showCancel?: boolean
-    /** 取消按钮文案 */
+    /** 取消按钮文案，未传时用语言包的 cancel 文案 */
     cancelText?: string
     /** 有内容时显示清除按钮 */
     clearable?: boolean
@@ -36,7 +37,7 @@ const props = withDefaults(
     readonly: false,
     maxlength: undefined,
     showCancel: false,
-    cancelText: '取消',
+    cancelText: undefined,
     clearable: true,
     size: undefined,
   },
@@ -53,6 +54,11 @@ const emit = defineEmits<{
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
 }>()
+
+const { t } = useJeLocale()
+
+/** 取消按钮文案：外部优先，未传时回退语言包的通用取消 */
+const cancelText = computed(() => props.cancelText ?? t('cancel'))
 
 /** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
 const size = useJeConfigSize(() => props.size)

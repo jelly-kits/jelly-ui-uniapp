@@ -5,6 +5,7 @@ import { useUid } from '../../core/useUid'
 import JeIcon from '../je-icon/je-icon.vue'
 import JeInput from '../je-input/je-input.vue'
 import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
+import { useJeLocale } from '../je-locale'
 import type { JeAutoCompleteOption } from './types'
 
 defineOptions({ name: 'JeAutoComplete' })
@@ -23,6 +24,7 @@ const props = withDefaults(
     triggerOnFocus?: boolean
     /** 输入防抖毫秒数 */
     debounce?: number
+    /** 加载中提示，未传时用语言包的 loading 文案 */
     loadingText?: string
     emptyText?: string
     /** 尺寸，不传时取祖先 JeConfigProvider 的配置，仍未配置时按 default */
@@ -35,7 +37,7 @@ const props = withDefaults(
     clearable: true,
     triggerOnFocus: true,
     debounce: 300,
-    loadingText: '加载中…',
+    loadingText: undefined,
     emptyText: '无匹配结果',
     size: undefined,
   },
@@ -46,6 +48,11 @@ const emit = defineEmits<{
   select: [option: JeAutoCompleteOption]
   change: [value: string]
 }>()
+
+const { t } = useJeLocale()
+
+/** 加载中文案：外部优先，未传时回退语言包的通用加载中 */
+const loadingText = computed(() => props.loadingText ?? t('loading'))
 
 /** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
 const size = useJeConfigSize(() => props.size)

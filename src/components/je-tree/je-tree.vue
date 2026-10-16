@@ -2,6 +2,7 @@
 import { computed, nextTick, provide, ref, watch } from 'vue'
 import JeEmpty from '../je-empty/je-empty.vue'
 import JeTreeNodeView from '../je-tree-node-view/je-tree-node-view.vue'
+import { useJeLocale } from '../je-locale'
 import { jeTreeKey, type JeTreeNode, type JeTreeContext } from './types'
 
 defineOptions({ name: 'JeTree' })
@@ -17,6 +18,7 @@ const props = withDefaults(
     defaultExpandAll?: boolean
     defaultExpandedKeys?: Array<string | number>
     expandOnClickNode?: boolean
+    /** 数据为空时的提示文案，未传时用语言包的 empty 文案 */
     emptyText?: string
   }>(),
   {
@@ -27,7 +29,7 @@ const props = withDefaults(
     accordion: false,
     defaultExpandAll: false,
     expandOnClickNode: true,
-    emptyText: '暂无数据',
+    emptyText: undefined,
   },
 )
 
@@ -38,6 +40,11 @@ const emit = defineEmits<{
   'node-expand': [keys: Array<string | number>]
   'node-collapse': [keys: Array<string | number>]
 }>()
+
+const { t } = useJeLocale()
+
+/** 空态文案：外部没传时回退语言包的通用空态文案 */
+const emptyText = computed(() => props.emptyText ?? t('empty'))
 
 const rootRef = ref<HTMLElement | null>(null)
 

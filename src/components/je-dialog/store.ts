@@ -1,4 +1,5 @@
 import { reactive, ref } from 'vue'
+import { resolveDefaultLang, resolveLocale } from '../je-locale'
 import type {
   JeDialogAction,
   JeDialogApi,
@@ -45,6 +46,9 @@ export interface JeDialogEntry {
 
 let seed = 0
 
+/** 命令式对话框在组件树之外（拿不到 provide / inject），按应用级缺省语言解析一份语言包取通用文案 */
+const resolveMessages = () => resolveLocale(resolveDefaultLang())
+
 /** 生效中的命令式对话框，后压入的在上（层级由各自的 zIndex 决定） */
 export const jeDialogStack = ref<JeDialogEntry[]>([])
 
@@ -80,8 +84,8 @@ function openDialog(options: JeDialogOptions): Promise<JeDialogAction> & JeDialo
     top: options.top ?? '',
     footerLayout: options.footerLayout ?? 'auto',
     showCancelButton: options.showCancelButton ?? false,
-    confirmButtonText: options.confirmButtonText ?? '确定',
-    cancelButtonText: options.cancelButtonText ?? '取消',
+    confirmButtonText: options.confirmButtonText ?? resolveMessages().confirm,
+    cancelButtonText: options.cancelButtonText ?? resolveMessages().cancel,
     beforeClose: options.beforeClose,
     zIndex: options.zIndex,
     action: undefined,
@@ -105,8 +109,8 @@ function confirmDialog(options: JeDialogOptions): Promise<JeDialogAction> {
   return showDialog({
     showCancelButton: true,
     ...options,
-    confirmButtonText: options.confirmButtonText ?? '确定',
-    cancelButtonText: options.cancelButtonText ?? '取消',
+    confirmButtonText: options.confirmButtonText ?? resolveMessages().confirm,
+    cancelButtonText: options.cancelButtonText ?? resolveMessages().cancel,
   })
 }
 

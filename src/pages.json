@@ -205,6 +205,12 @@
       }
     },
     {
+      "path": "pages/demo/block-editor",
+      "style": {
+        "navigationBarTitleText": "块编辑器"
+      }
+    },
+    {
       "path": "pages/demo/signature",
       "style": {
         "navigationBarTitleText": "手写签名"

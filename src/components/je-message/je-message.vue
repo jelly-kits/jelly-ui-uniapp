@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import { jeMessageQueue, markMessageHost, removeMessage } from './store'
 import type { JeMessageItem } from './types'
 
@@ -13,6 +14,8 @@ import type { JeMessageItem } from './types'
  * H5 端同样走这套，保证两端行为一致。页面只需挂一次，队列为空时不渲染任何条目。
  */
 defineOptions({ name: 'JeMessage' })
+
+const { t } = useJeLocale()
 
 /** 浮层层级：有消息出现时重新取一个，保证压得住页面固定头栏 */
 const zIndex = ref(nextZIndex())
@@ -158,7 +161,7 @@ onBeforeUnmount(() => {
           v-if="item.showClose"
           type="button"
           class="je-message__close"
-          aria-label="关闭"
+          :aria-label="t('close')"
           @tap.stop="closeItem(item)"
         >
           <JeIcon name="close" :size="14" />

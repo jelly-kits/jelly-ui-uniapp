@@ -31,6 +31,8 @@ const rows = computed(() => {
     { label: 'confirm', text: pack.confirm },
     { label: 'cancel', text: pack.cancel },
     { label: 'loading', text: pack.loading },
+    { label: 'close', text: pack.close },
+    { label: 'empty', text: pack.empty },
     { label: 'signature.clear', text: pack.signature.clear },
     { label: 'signature.tip', text: pack.signature.tip },
     { label: 'shareSheet.title', text: pack.shareSheet.title },
@@ -93,7 +95,7 @@ const rows = computed(() => {
             3. 消费组件里用 t('分组.字段') 取文案；未命中会原样返回这个 key，方便排查漏配。
           </je-text>
           <je-text tag="div" size="small">
-            当前已有字段：confirm、cancel、loading、signature.clear / undo / tip、shareSheet.title / cancel、
+            当前已有字段：confirm、cancel、loading、close、empty、signature.clear / undo / tip、shareSheet.title / cancel、
             imagePreview.close / index、orgChart.name / title / addChild / remove / removeConfirm /
             removeConfirmLeaf / newNode。
           </je-text>

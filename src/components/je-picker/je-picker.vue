@@ -5,6 +5,7 @@ import { useUid } from '../../core/useUid'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
 import { useJeConfigSize, type JeConfigSize } from '../je-config-provider'
+import { useJeLocale } from '../je-locale'
 import type { JePickerColumn, JePickerOption } from './types'
 
 defineOptions({ name: 'JePicker' })
@@ -21,9 +22,9 @@ const props = withDefaults(
     placeholder?: string
     /** 禁用整个选择器 */
     disabled?: boolean
-    /** 确认按钮文字 */
+    /** 确认按钮文字，未传时用语言包的 confirm 文案 */
     confirmText?: string
-    /** 取消按钮文字 */
+    /** 取消按钮文字，未传时用语言包的 cancel 文案 */
     cancelText?: string
     /** 是否显示顶部工具栏（取消 / 标题 / 确认） */
     showToolbar?: boolean
@@ -42,8 +43,8 @@ const props = withDefaults(
     title: '',
     placeholder: '请选择',
     disabled: false,
-    confirmText: '确认',
-    cancelText: '取消',
+    confirmText: undefined,
+    cancelText: undefined,
     showToolbar: true,
     visibleItemCount: 5,
     itemHeight: 44,
@@ -61,6 +62,13 @@ const emit = defineEmits<{
   /** 点击取消或遮罩 */
   cancel: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 确认按钮文案：外部优先，未传时回退语言包的通用确定 */
+const confirmText = computed(() => props.confirmText ?? t('confirm'))
+/** 取消按钮文案：外部优先，未传时回退语言包的通用取消 */
+const cancelText = computed(() => props.cancelText ?? t('cancel'))
 
 /** 尺寸：组件自身优先，再退回全局配置；default 不产生类名（基础样式即 default） */
 const size = useJeConfigSize(() => props.size)

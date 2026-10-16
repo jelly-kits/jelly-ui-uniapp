@@ -196,9 +196,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "cancelText",
-        "description": "取消按钮文字，传空字符串则不显示取消按钮",
-        "type": "string",
-        "default": "'取消'"
+        "description": "取消按钮文字，未传时用语言包的 cancel 文案；传空字符串则不显示取消按钮",
+        "type": "string"
       },
       {
         "name": "closeOnClickAction",
@@ -540,15 +539,13 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "confirmText",
-        "description": "确认按钮文案",
-        "type": "string",
-        "default": "'确认'"
+        "description": "确认按钮文字，未传时用语言包的 confirm 文案",
+        "type": "string"
       },
       {
         "name": "cancelText",
-        "description": "取消按钮文案",
-        "type": "string",
-        "default": "'取消'"
+        "description": "取消按钮文字，未传时用语言包的 cancel 文案",
+        "type": "string"
       },
       {
         "name": "showToolbar",
@@ -668,9 +665,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "loadingText",
-        "description": "加载中的文案",
-        "type": "string",
-        "default": "'加载中…'"
+        "description": "加载中提示，未传时用语言包的 loading 文案",
+        "type": "string"
       },
       {
         "name": "emptyText",
@@ -785,6 +781,120 @@ export const componentApi: Record<string, ComponentApi> = {
         "description": "默认内容"
       }
     ],
+    "exposes": []
+  },
+  "je-block-editor": {
+    "attributes": [
+      {
+        "name": "modelValue",
+        "description": "完整数据，v-model 绑定",
+        "type": "JeBlockDocument"
+      },
+      {
+        "name": "blockTypes",
+        "description": "允许添加的块类型白名单，不传则四种都能加",
+        "type": "JeBlockType[]"
+      },
+      {
+        "name": "toolbar",
+        "description": "顶部操作栏：内置「添加块」按钮写块类型 key（同时就是白名单与顺序），\n`'divider'` 画分组竖线，也可以直接混入自定义按钮对象。不传则四种块都可加。",
+        "type": "JeBlockToolbarItem[]"
+      },
+      {
+        "name": "blockActions",
+        "description": "每块头部的操作按钮：内置 key 是 `'drag' | 'edit' | 'up' | 'down' | 'copy' | 'remove'`，\n同样支持 `'divider'` 与自定义按钮对象。不传即全部六个。",
+        "type": "JeBlockActionItem[]"
+      },
+      {
+        "name": "placeholder",
+        "description": "文本块的占位文案",
+        "type": "string"
+      },
+      {
+        "name": "upload",
+        "description": "图片 / 视频上传回调，不传则编辑窗口里只能填地址",
+        "type": "JeBlockUpload"
+      },
+      {
+        "name": "disabled",
+        "description": "是否禁用",
+        "type": "boolean",
+        "default": "false"
+      }
+    ],
+    "events": [
+      {
+        "name": "update:modelValue",
+        "description": "v-model 的 modelValue 更新时触发",
+        "type": "(value: JeBlockDocument) => void"
+      },
+      {
+        "name": "change",
+        "description": "数据变化，与 update:modelValue 同值，便于 v-model 之外单独监听",
+        "type": "(value: JeBlockDocument) => void"
+      },
+      {
+        "name": "upload-error",
+        "description": "上传失败（回调抛错时派发）",
+        "type": "(file: JeBlockUploadFile, error: unknown) => void"
+      }
+    ],
+    "slots": [
+      {
+        "name": "block-head",
+        "type": "{ block, index, edit }"
+      },
+      {
+        "name": "footer",
+        "description": "底部区域"
+      }
+    ],
+    "exposes": [
+      {
+        "name": "getDocument",
+        "description": "当前数据（深拷贝，可直接存库）"
+      },
+      {
+        "name": "addBlock",
+        "description": "追加一个空块，返回新块的 id"
+      },
+      {
+        "name": "openEditor",
+        "description": "打开某个块的编辑窗口"
+      },
+      {
+        "name": "clear",
+        "description": "清空所有块"
+      }
+    ]
+  },
+  "je-block-view": {
+    "attributes": [
+      {
+        "name": "value",
+        "description": "数据：完整文档（{ version, blocks }）或块数组都行",
+        "type": "JeBlockViewValue"
+      },
+      {
+        "name": "linkTarget",
+        "description": "链接的打开方式，仅 H5 端生效",
+        "type": "string",
+        "default": "'_blank'"
+      },
+      {
+        "name": "emptyText",
+        "description": "空数据时的占位文案，传空串则不显示",
+        "type": "string"
+      }
+    ],
+    "events": [
+      {
+        "name": "link-click",
+        "description": "点击链接块：小程序端没有外链跳转，把地址交给宿主处理（H5 端走原生 <a>，不派发）",
+        "type": "(block: JeBlock) => void"
+      }
+    ],
+    "slots": [],
     "exposes": []
   },
   "je-breadcrumb": {
@@ -2456,9 +2566,8 @@ export const componentApi: Record<string, ComponentApi> = {
     "attributes": [
       {
         "name": "description",
-        "description": "描述文案",
-        "type": "string",
-        "default": "'暂无数据'"
+        "description": "描述文案，未传时用语言包的 empty 文案",
+        "type": "string"
       },
       {
         "name": "imageSize",
@@ -3134,9 +3243,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "loadingText",
-        "description": "加载中提示",
-        "type": "string",
-        "default": "'加载中...'"
+        "description": "加载中提示，未传时用语言包的 loading 文案",
+        "type": "string"
       },
       {
         "name": "finishedText",
@@ -4536,15 +4644,13 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "confirmText",
-        "description": "确认按钮文字",
-        "type": "string",
-        "default": "'确认'"
+        "description": "确认按钮文字，未传时用语言包的 confirm 文案",
+        "type": "string"
       },
       {
         "name": "cancelText",
-        "description": "取消按钮文字",
-        "type": "string",
-        "default": "'取消'"
+        "description": "取消按钮文字，未传时用语言包的 cancel 文案",
+        "type": "string"
       },
       {
         "name": "showToolbar",
@@ -4623,15 +4729,13 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "confirmText",
-        "description": "确认按钮文案",
-        "type": "string",
-        "default": "'确定'"
+        "description": "确认按钮文字，未传时用语言包的 confirm 文案",
+        "type": "string"
       },
       {
         "name": "cancelText",
-        "description": "取消按钮文案",
-        "type": "string",
-        "default": "'取消'"
+        "description": "取消按钮文字，未传时用语言包的 cancel 文案",
+        "type": "string"
       },
       {
         "name": "placement",
@@ -5046,9 +5150,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "loadingText",
-        "description": "加载中提示",
-        "type": "string",
-        "default": "'加载中...'"
+        "description": "加载中提示，未传时用语言包的 loading 文案",
+        "type": "string"
       },
       {
         "name": "successText",
@@ -5498,9 +5601,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "cancelText",
-        "description": "取消按钮文案",
-        "type": "string",
-        "default": "'取消'"
+        "description": "取消按钮文案，未传时用语言包的 cancel 文案",
+        "type": "string"
       },
       {
         "name": "clearable",
@@ -6932,9 +7034,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "emptyText",
-        "description": "数据为空时的提示文案",
-        "type": "string",
-        "default": "'暂无数据'"
+        "description": "数据为空时的提示文案，未传时用语言包的 empty 文案",
+        "type": "string"
       },
       {
         "name": "rowKey",
@@ -7622,9 +7723,8 @@ export const componentApi: Record<string, ComponentApi> = {
       },
       {
         "name": "emptyText",
-        "description": "数据为空时的文案",
-        "type": "string",
-        "default": "'暂无数据'"
+        "description": "数据为空时的提示文案，未传时用语言包的 empty 文案",
+        "type": "string"
       }
     ],
     "events": [
@@ -8078,6 +8178,10 @@ export const routeApi: Record<string, string[]> = {
   ],
   "backtop": [
     "je-backtop"
+  ],
+  "block-editor": [
+    "je-block-editor",
+    "je-block-view"
   ],
   "breadcrumb": [
     "je-breadcrumb",

@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useJeLocale } from '../je-locale'
 import type { JeEmptyImageSlotProps } from './types'
 
 defineOptions({ name: 'JeEmpty' })
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
-    /** 描述文案 */
+    /** 描述文案，未传时用语言包的 empty 文案 */
     description?: string
     /** 默认插画尺寸（px） */
     imageSize?: number
   }>(),
-  { description: '暂无数据', imageSize: 100 },
+  { description: undefined, imageSize: 100 },
 )
+
+const { t } = useJeLocale()
+
+/** 描述文案：外部没传时回退语言包的通用空态文案 */
+const description = computed(() => props.description ?? t('empty'))
 
 defineSlots<{
   /** 自定义插画，作用域参数带建议尺寸 */
@@ -55,7 +62,7 @@ const maskSrc = `url("data:image/svg+xml,${encodeURIComponent(ILLUSTRATION)}")`
           height="100%"
           fill="none"
           role="img"
-          aria-label="暂无数据"
+          :aria-label="t('empty')"
         >
           <ellipse class="je-empty__shadow" cx="60" cy="102" rx="32" ry="6" />
           <path class="je-empty__box" d="M24 50h72l-7 44a6 6 0 0 1-5.9 5H36.9A6 6 0 0 1 31 94Z" />

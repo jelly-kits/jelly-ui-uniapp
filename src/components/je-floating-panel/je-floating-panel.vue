@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
 import JeScrollbar from '../je-scrollbar/je-scrollbar.vue'
+import { useJeLocale } from '../je-locale'
 
 defineOptions({ name: 'JeFloatingPanel' })
 
@@ -42,6 +43,8 @@ const emit = defineEmits<{
   /** 点击关闭按钮 */
   close: []
 }>()
+
+const { t } = useJeLocale()
 
 /** 视口高度：小程序端没有 window，改问 uni */
 const readViewportHeight = () => {
@@ -236,7 +239,7 @@ defineExpose({
           v-if="closeable"
           type="button"
           class="je-floating-panel__close"
-          aria-label="关闭"
+          :aria-label="t('close')"
           @pointerdown.stop
           @touchstart.stop
           @tap="onClose"

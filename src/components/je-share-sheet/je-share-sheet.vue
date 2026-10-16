@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useSheetDrag } from '../../core/useSheetDrag'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeShareOption } from './types'
 
 defineOptions({ name: 'JeShareSheet' })
@@ -50,9 +51,11 @@ const emit = defineEmits<{
   close: []
 }>()
 
-/* 主库文案走语言包，uni 侧没有 i18n，用中文兜底 */
-const titleText = computed(() => props.title ?? '分享到')
-const cancelLabel = computed(() => props.cancelText ?? '取消')
+const { t } = useJeLocale()
+
+/* 标题与取消按钮走语言包，外部传了值优先 */
+const titleText = computed(() => props.title ?? t('shareSheet.title'))
+const cancelLabel = computed(() => props.cancelText ?? t('shareSheet.cancel'))
 
 const zIndex = ref(nextZIndex())
 

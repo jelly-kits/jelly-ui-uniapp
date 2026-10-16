@@ -139,7 +139,7 @@ export interface JeTableProps {
   stripe?: boolean
   /** 是否显示表头（仅表格形态） */
   showHeader?: boolean
-  /** 数据为空时的提示文案 */
+  /** 数据为空时的提示文案，未传时用语言包的 empty 文案 */
   emptyText?: string
   /** 行唯一键的字段名（支持 `user.info.id` 这种多级路径），或自定义取值函数 */
   rowKey?: string | ((row: JeTableRow) => string | number)

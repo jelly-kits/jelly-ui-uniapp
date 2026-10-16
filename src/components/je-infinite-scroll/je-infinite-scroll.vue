@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 
 defineOptions({ name: 'JeInfiniteScroll' })
 
@@ -16,7 +17,7 @@ const props = withDefaults(
     offset?: number
     /** 挂载时立即检查一次（内容不足一屏时很有用） */
     immediateCheck?: boolean
-    /** 加载中提示 */
+    /** 加载中提示，未传时用语言包的 loading 文案 */
     loadingText?: string
     /** 加载完成提示 */
     finishedText?: string
@@ -29,7 +30,7 @@ const props = withDefaults(
     error: false,
     offset: 300,
     immediateCheck: true,
-    loadingText: '加载中...',
+    loadingText: undefined,
     finishedText: '没有更多了',
     errorText: '加载失败，点击重试',
   },
@@ -39,6 +40,11 @@ const emit = defineEmits<{
   /** 滚动到底部附近，需要加载下一页 */
   load: []
 }>()
+
+const { t } = useJeLocale()
+
+/** 加载中提示：外部优先，未传时回退语言包的通用加载中 */
+const loadingText = computed(() => props.loadingText ?? t('loading'))
 
 const rootRef = ref<HTMLElement | null>(null)
 const instance = getCurrentInstance()
@@ -164,7 +170,7 @@ const state = computed(() => {
 })
 
 const stateText = computed(() => {
-  if (state.value === 'loading') return props.loadingText
+  if (state.value === 'loading') return loadingText.value
   if (state.value === 'error') return props.errorText
   if (state.value === 'finished') return props.finishedText
   return ''

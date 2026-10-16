@@ -46,13 +46,15 @@ const componentCount = items.length
 /**
  * 菜单里的组件代码名：由 api-data.ts 的 routeApi 派生（je-button → Button），
  * 不在 sections.ts 里再维护一份。一个页面挂多个组件时取第一个，
- * 足够提示「这页讲的是哪个组件」；没有对应组件的页面（总览 / Install）返回空串。
+ * 足够提示「这页讲的是哪个组件」。
+ *
+ * 少数页面（如「主题」）是纯说明页，没有对应组件，退化成路由名首字母大写
+ * （theme → Theme）—— 菜单里各项都是「英文名 + 中文名」，不因为它是说明页就少一段。
  */
 const codeNameOf = (route: string) => {
   const tag = routeApi[route]?.[0]
-  if (!tag) return ''
-  return tag
-    .replace(/^je-/, '')
+  const name = tag ? tag.replace(/^je-/, '') : route
+  return name
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')

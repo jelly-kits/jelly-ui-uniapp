@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { nextZIndex } from '../../core/useZIndex'
 import JeIcon from '../je-icon/je-icon.vue'
+import { useJeLocale } from '../je-locale'
 import type { JeIconName } from '../je-icon/icons'
 
 defineOptions({ name: 'JeDrawer' })
@@ -50,6 +51,8 @@ const emit = defineEmits<{
   /** 开始收起 */
   close: []
 }>()
+
+const { t } = useJeLocale()
 
 const innerZIndex = ref(nextZIndex())
 
@@ -132,7 +135,7 @@ const onScrimClick = () => {
         <slot name="header">
           <text class="je-drawer__title">{{ title }}</text>
         </slot>
-        <button v-if="showClose" type="button" class="je-drawer__close" aria-label="关闭" @tap="close">
+        <button v-if="showClose" type="button" class="je-drawer__close" :aria-label="t('close')" @tap="close">
           <JeIcon :name="closeIcon" :size="18" />
         </button>
       </view>
